@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+}
+
+model HomeContent {
+  id          String   @id @default(uuid())
+  section     String   @unique // ex: 'hero', 'services', 'contact'
+  title       String
+  description String?  @db.Text
+  mediaUrl    String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Portfolio {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  mediaType   String   // 'image' ou 'video'
+  mediaUrl    String
+  order       Int      @default(0) // Para organizar a ordem de exibição
+  createdAt   DateTime @default(now())
+}
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique // Ex: 'home_title', 'about_text'
+  value String @db.Text
+}
