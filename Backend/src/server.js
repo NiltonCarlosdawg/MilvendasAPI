@@ -31,7 +31,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // 3. Configuração Dinâmica do Swagger (Local vs Produção)
 const serverUrl = process.env.NODE_ENV === 'production' 
-  ? 'https://sua-api-milvendas.onrender.com' // Altere para sua URL após criar o serviço no Render
+  ? 'https://milvendasapi.onrender.com'
   : `http://localhost:${PORT}`;
 
 const swaggerOptions = {
