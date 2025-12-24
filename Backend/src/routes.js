@@ -12,28 +12,57 @@ import { updateSetting, getSettings, deleteSetting } from './controllers/Setting
 
 const router = Router();
 
-// --- Rotas de Autenticação ---
+/**
+ * @swagger
+ * /api/auth/login:
+ * post:
+ * summary: Autentica o usuário e retorna um token JWT
+ * tags: [Auth]
+ */
 router.post('/auth/register', register);
 router.post('/auth/login', login);
 
-// --- Rotas de Configurações (Textos da Home/Quem Somos) ---
-router.get('/settings', getSettings); // Público para o site
-router.post('/settings', authMiddleware, updateSetting); // Protegido para o admin
+/**
+ * @swagger
+ * /api/settings:
+ * get:
+ * summary: Retorna as configurações do site (Quem somos, textos home)
+ * tags: [Settings]
+ */
+router.get('/settings', getSettings);
+router.post('/settings', authMiddleware, updateSetting);
 router.delete('/settings/:key', authMiddleware, deleteSetting);
 
-// --- Rotas do Portfólio (Trabalhos/Mídias) ---
-
-// Listagem (Público)
+/**
+ * @swagger
+ * /api/portfolio:
+ * get:
+ * summary: Lista todos os itens do portfólio
+ * tags: [Portfolio]
+ * post:
+ * summary: Cria um novo item (Requer Auth e arquivo)
+ * security:
+ * - bearerAuth: []
+ * tags: [Portfolio]
+ */
 router.get('/portfolio', getPortfolio);
-
-// Criação (Protegido + Upload)
 router.post('/portfolio', authMiddleware, upload.single('file'), createItem);
 
-// Atualização (Protegido + Upload opcional)
-// Usamos PUT para indicar que estamos atualizando um recurso existente pelo ID
+/**
+ * @swagger
+ * /api/portfolio/{id}:
+ * put:
+ * summary: Atualiza um item existente
+ * security:
+ * - bearerAuth: []
+ * tags: [Portfolio]
+ * delete:
+ * summary: Remove um item e o arquivo físico
+ * security:
+ * - bearerAuth: []
+ * tags: [Portfolio]
+ */
 router.put('/portfolio/:id', authMiddleware, upload.single('file'), updateItem);
-
-// Exclusão (Protegido)
 router.delete('/portfolio/:id', authMiddleware, deleteItem);
 
 export default router;
