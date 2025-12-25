@@ -1,14 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import router from './routes.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// Importações para Documentação
+// Importações para Documentação (Swagger)
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+
+// IMPORTAR AS NOVAS ROTAS
+import authRoutes from './routes/auth.routes.js';
+import portfolioRoutes from './routes/portfolio.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
 
 // Configurações de caminho (ES Modules)
 const __filename = fileURLToPath(import.meta.url);
@@ -17,19 +21,20 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Importante: No Render a porta é dinâmica, mas localmente usa a 3000 ou 3001
+const PORT = process.env.PORT || 3001; 
 
 // 1. Middlewares globais
 app.use(cors());
 app.use(express.json());
 
-// 2. Garantir que a pasta uploads existe (Essencial para não dar erro no Multer)
+// 2. Garantir que a pasta uploads existe
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// 3. Configuração Dinâmica do Swagger (Local vs Produção)
+// 3. Configuração do Swagger
 const serverUrl = process.env.NODE_ENV === 'production' 
   ? 'https://milvendasapi.onrender.com'
   : `http://localhost:${PORT}`;
@@ -53,24 +58,33 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ['./src/routes.js'], 
+  // Atenção: Atualize o caminho para onde os comentários JSDoc estão (agora nas rotas separadas)
+  apis: ['./src/routes/*.js'], 
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// 4. Rotas e Arquivos Estáticos
-app.use('/api', router);
+// 4. DEFINIÇÃO DAS ROTAS (VERSIONAMENTO V1)
+// Aqui aplicamos a "base" de cada domínio
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/portfolio', portfolioRoutes);
+app.use('/api/v1/settings', settingsRoutes);
+
+// Servir arquivos estáticos (Imagens do portfólio)
 app.use('/uploads', express.static(uploadDir));
 
 // Rota raiz para verificação de saúde (Health Check)
 app.get('/', (req, res) => {
-  res.json({ status: 'API Online', documentation: `${serverUrl}/api-docs` });
+  res.json({ 
+    status: 'API Online', 
+    version: 'v1',
+    documentation: `${serverUrl}/api-docs` 
+  });
 });
 
-// 5. Inicialização do Servidor
-// Nota: O host '0.0.0.0' é fundamental para o Render aceitar conexões externas
+// Inicialização do Servidor
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 API MilVendas rodando em: ${serverUrl}`);
-  console.log(`📖 Documentação: ${serverUrl}/api-docs`);
+  console.log(`Servidor a correr na porta ${PORT}`);
+  console.log(`Documentação disponível em ${serverUrl}/api-docs`);
 });
