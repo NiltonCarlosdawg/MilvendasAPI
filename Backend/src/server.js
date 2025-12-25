@@ -9,10 +9,12 @@ import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 
-// IMPORTAR AS NOVAS ROTAS
+// IMPORTAÇÃO DAS ROTAS MODULARES
 import authRoutes from './routes/auth.routes.js';
 import portfolioRoutes from './routes/portfolio.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
+import newsletterRoutes from './routes/newsletter.routes.js';
+import userRoutes from './routes/user.routes.js'; // Rota de perfil do Admin
 
 // Configurações de caminho (ES Modules)
 const __filename = fileURLToPath(import.meta.url);
@@ -21,14 +23,15 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-// Importante: No Render a porta é dinâmica, mas localmente usa a 3000 ou 3001
+
+// Porta dinâmica para o Render ou 3001 para Local
 const PORT = process.env.PORT || 3001; 
 
 // 1. Middlewares globais
 app.use(cors());
 app.use(express.json());
 
-// 2. Garantir que a pasta uploads existe
+// 2. Garantir que a pasta uploads existe para o Multer não falhar
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -45,7 +48,7 @@ const swaggerOptions = {
     info: {
       title: 'API MilVendas',
       version: '1.0.0',
-      description: 'Documentação do Backend CMS e Portfólio',
+      description: 'Documentação do Backend CMS e Portfólio (v1)',
     },
     servers: [{ url: serverUrl }],
     components: {
@@ -58,7 +61,7 @@ const swaggerOptions = {
       },
     },
   },
-  // Atenção: Atualize o caminho para onde os comentários JSDoc estão (agora nas rotas separadas)
+  // Procura documentação em todos os arquivos dentro de routes
   apis: ['./src/routes/*.js'], 
 };
 
@@ -66,25 +69,28 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // 4. DEFINIÇÃO DAS ROTAS (VERSIONAMENTO V1)
-// Aqui aplicamos a "base" de cada domínio
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/portfolio', portfolioRoutes);
-app.use('/api/v1/settings', settingsRoutes);
+app.use('/api/v1/auth', authRoutes);         // Login e Registro
+app.use('/api/v1/users', userRoutes);       // Perfil do Admin (/me)
+app.use('/api/v1/portfolio', portfolioRoutes); // CRUD de Portfólio
+app.use('/api/v1/settings', settingsRoutes);   // Configurações do site
+app.use('/api/v1/newsletter', newsletterRoutes); // Inscrição e Envio em massa
 
-// Servir arquivos estáticos (Imagens do portfólio)
+// Servir arquivos estáticos (Imagens/Vídeos do portfólio)
 app.use('/uploads', express.static(uploadDir));
 
-// Rota raiz para verificação de saúde (Health Check)
+// Rota raiz - Health Check
 app.get('/', (req, res) => {
   res.json({ 
     status: 'API Online', 
     version: 'v1',
+    endpoints_base: '/api/v1',
     documentation: `${serverUrl}/api-docs` 
   });
 });
 
 // Inicialização do Servidor
+// O '0.0.0.0' é importante para o Render mapear a rede corretamente
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor a correr na porta ${PORT}`);
-  console.log(`Documentação disponível em ${serverUrl}/api-docs`);
+  console.log(`🚀 Servidor MilVendas rodando na porta ${PORT}`);
+  console.log(`📄 Documentação: ${serverUrl}/api-docs`);
 });

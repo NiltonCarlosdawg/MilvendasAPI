@@ -37,3 +37,9 @@ model Setting {
   key   String @unique // Ex: 'home_title', 'about_text'
   value String @db.Text
 }
+model Newsletter {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
