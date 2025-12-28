@@ -1,13 +1,24 @@
 import { Router } from 'express';
-import { subscribe, sendBroadcast } from '../controllers/NewsletterController.js';
+import { subscribe, sendBroadcast, unsubscribe } from '../controllers/NewsletterController.js';
 import { authMiddleware } from '../middlewares/auth.js';
 
 const router = Router();
 
-// Rota pública (para o rodapé do site)
+// ========================================
+// ROTAS PÚBLICAS
+// ========================================
+
+// Inscrição na newsletter (rodapé do site)
 router.post('/subscribe', subscribe);
 
-// Rota privada (apenas Admin logado pode disparar)
+// Cancelar inscrição (link no email)
+router.get('/unsubscribe', unsubscribe);
+
+// ========================================
+// ROTAS PRIVADAS (Admin apenas)
+// ========================================
+
+// Enviar newsletter em massa
 router.post('/broadcast', authMiddleware, sendBroadcast);
 
 export default router;
