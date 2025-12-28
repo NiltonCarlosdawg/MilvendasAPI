@@ -14,7 +14,7 @@ import authRoutes from './routes/auth.routes.js';
 import portfolioRoutes from './routes/portfolio.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import newsletterRoutes from './routes/newsletter.routes.js';
-import userRoutes from './routes/user.routes.js'; // Rota de perfil do Admin
+import userRoutes from './routes/user.routes.js';
 
 // Configurações de caminho (ES Modules)
 const __filename = fileURLToPath(import.meta.url);
@@ -27,17 +27,67 @@ const app = express();
 // Porta dinâmica para o Render ou 3001 para Local
 const PORT = process.env.PORT || 3001; 
 
-// 1. Middlewares globais
-app.use(cors());
-app.use(express.json());
+// ========================================
+// CONFIGURAÇÃO CORS SEGURA
+// ========================================
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      // Desenvolvimento local (sempre permitido)
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:4200',
+      'http://127.0.0.1:3000',
+      
+      // Produção (defina no .env)
+      process.env.FRONTEND_URL,
+      
+      // Adicione seus domínios aqui se tiver
+      // 'https://seu-dominio.com',
+      // 'https://www.seu-dominio.com'
+    ].filter(Boolean); // Remove valores undefined/null
 
-// 2. Garantir que a pasta uploads existe para o Multer não falhar
+    // Permitir requisições sem origin (mobile apps, Postman, etc)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origem não permitida pelo CORS'));
+    }
+  },
+  credentials: true,                    // Permitir cookies e headers de autenticação
+  optionsSuccessStatus: 200,           // Para browsers antigos
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept'
+  ],
+  exposedHeaders: ['Authorization'],   // Headers que o cliente pode acessar
+  maxAge: 86400                        // Cache da preflight request (24 horas)
+};
+
+// ========================================
+// MIDDLEWARES GLOBAIS
+// ========================================
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ========================================
+// GARANTIR PASTA UPLOADS
+// ========================================
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// 3. Configuração do Swagger
+// ========================================
+// CONFIGURAÇÃO DO SWAGGER
+// ========================================
 const serverUrl = process.env.NODE_ENV === 'production' 
   ? 'https://milvendasapi.onrender.com'
   : `http://localhost:${PORT}`;
@@ -61,36 +111,55 @@ const swaggerOptions = {
       },
     },
   },
-  // Procura documentação em todos os arquivos dentro de routes
   apis: ['./src/routes/*.js'], 
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// 4. DEFINIÇÃO DAS ROTAS (VERSIONAMENTO V1)
-app.use('/api/v1/auth', authRoutes);         // Login e Registro
-app.use('/api/v1/users', userRoutes);       // Perfil do Admin (/me)
-app.use('/api/v1/portfolio', portfolioRoutes); // CRUD de Portfólio
-app.use('/api/v1/settings', settingsRoutes);   // Configurações do site
-app.use('/api/v1/newsletter', newsletterRoutes); // Inscrição e Envio em massa
+// ========================================
+// DEFINIÇÃO DAS ROTAS (VERSIONAMENTO V1)
+// ========================================
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/portfolio', portfolioRoutes);
+app.use('/api/v1/settings', settingsRoutes);
+app.use('/api/v1/newsletter', newsletterRoutes);
 
-// Servir arquivos estáticos (Imagens/Vídeos do portfólio)
-app.use('/uploads', express.static(uploadDir));
+// Servir arquivos estáticos com CORS
+app.use('/uploads', cors(corsOptions), express.static(uploadDir));
 
-// Rota raiz - Health Check
+// ========================================
+// ROTA RAIZ - HEALTH CHECK
+// ========================================
 app.get('/', (req, res) => {
   res.json({ 
     status: 'API Online', 
     version: 'v1',
     endpoints_base: '/api/v1',
-    documentation: `${serverUrl}/api-docs` 
+    documentation: `${serverUrl}/api-docs`,
+    cors_enabled: true
   });
 });
 
-// Inicialização do Servidor
-// O '0.0.0.0' é importante para o Render mapear a rede corretamente
+// ========================================
+// HANDLER DE ERROS CORS
+// ========================================
+app.use((err, req, res, next) => {
+  if (err.message === 'Origem não permitida pelo CORS') {
+    return res.status(403).json({ 
+      error: 'Acesso negado pelo CORS',
+      message: 'Origem não autorizada para acessar esta API'
+    });
+  }
+  next(err);
+});
+
+// ========================================
+// INICIALIZAÇÃO DO SERVIDOR
+// ========================================
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor MilVendas rodando na porta ${PORT}`);
   console.log(`📄 Documentação: ${serverUrl}/api-docs`);
+  console.log(`🔒 CORS ativado e configurado`);
 });
