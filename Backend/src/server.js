@@ -15,6 +15,7 @@ import portfolioRoutes from './routes/portfolio.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import newsletterRoutes from './routes/newsletter.routes.js';
 import userRoutes from './routes/user.routes.js';
+import eventRoutes from './routes/events.routes.js';
 
 // Configurações de caminho (ES Modules)
 const __filename = fileURLToPath(import.meta.url);
@@ -125,6 +126,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/portfolio', portfolioRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/newsletter', newsletterRoutes);
+app.use('/api/v1/events', eventRoutes);
 
 // Servir arquivos estáticos com CORS
 app.use('/uploads', cors(corsOptions), express.static(uploadDir));

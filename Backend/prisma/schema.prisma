@@ -46,3 +46,122 @@ model Newsletter {
 
   @@map("newsletters")
 }
+// Enum para tipo de evento
+enum EventType {
+  OWN       // Evento próprio da empresa
+  THIRD_PARTY // Evento de terceiros
+}
+
+// Enum para status do evento
+enum EventStatus {
+  DRAFT      // Rascunho
+  PUBLISHED  // Publicado
+  CANCELLED  // Cancelado
+  FINISHED   // Finalizado
+}
+
+// ========================================
+// MODEL: EVENT (Eventos)
+// ========================================
+model Event {
+  id              String      @id @default(cuid())
+  
+  // Informações básicas
+  title           String
+  slug            String      @unique  // URL amigável (ex: festa-verao-2025)
+  eventType       EventType              // Próprio ou Terceiros
+  status          EventStatus @default(DRAFT)
+  
+  // Descrições
+  descriptionShort String     @db.Text    // Descrição curta (obrigatória)
+  descriptionLong  String?    @db.Text    // Descrição longa (opcional)
+  
+  // Datas e localização
+  eventDate       DateTime               // Data do evento
+  eventEndDate    DateTime?              // Data de término (opcional)
+  location        String                 // Local do evento
+  address         String?                // Endereço completo (opcional)
+  
+  // Informações adicionais
+  organizerName   String?                // Nome do organizador (se terceiros)
+  organizerContact String?               // Contato do organizador
+  capacity        Int?                   // Capacidade de público
+  
+  // Configurações
+  allowTicketRequest Boolean  @default(false) // Permite solicitação de ingresso?
+  externalLink    String?                // Link externo (site do evento)
+  
+  // Relacionamentos
+  media           EventMedia[]           // Imagens e vídeos
+  ticketRequests  EventTicketRequest[]   // Solicitações de ingresso
+  
+  // Metadados
+  viewCount       Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@map("events")
+  @@index([slug])
+  @@index([eventType])
+  @@index([status])
+  @@index([eventDate])
+}
+
+// ========================================
+// MODEL: EVENT MEDIA (Mídias do Evento)
+// ========================================
+model EventMedia {
+  id          String   @id @default(cuid())
+  eventId     String
+  
+  // Tipo de mídia
+  mediaType   String   // "image" ou "video"
+  mediaUrl    String   // Nome do arquivo
+  
+  // Informações adicionais
+  title       String?  // Título/legenda da mídia
+  order       Int      @default(0) // Ordem de exibição
+  isCover     Boolean  @default(false) // É a imagem de capa?
+  
+  // Relacionamento
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("event_media")
+  @@index([eventId])
+  @@index([mediaType])
+  @@index([order])
+}
+
+// ========================================
+// MODEL: EVENT TICKET REQUEST (Solicitações de Ingresso)
+// ========================================
+model EventTicketRequest {
+  id          String   @id @default(cuid())
+  eventId     String
+  
+  // Dados do solicitante
+  name        String
+  email       String
+  phone       String
+  
+  // Detalhes da solicitação
+  quantity    Int      @default(1) // Quantidade de ingressos
+  message     String?  @db.Text    // Mensagem adicional
+  
+  // Status
+  status      String   @default("pending") // pending, contacted, confirmed, rejected
+  
+  // Relacionamento
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("event_ticket_requests")
+  @@index([eventId])
+  @@index([email])
+  @@index([status])
+}
