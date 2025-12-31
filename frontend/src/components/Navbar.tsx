@@ -1,6 +1,8 @@
+// src/components/Navbar.tsx - ATUALIZADO
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import logoMv from '../assets/logo-mv.svg';
 import { useAppearance } from '../hooks/useAppearance';
 
@@ -8,10 +10,12 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { theme, setTheme } = useAppearance();
 
-  // Mapeamento das rotas para IDs (removendo acentos para os IDs do HTML)
+  // Mapeamento das rotas
   const navLinks = [
     { name: 'Serviços', href: '#servicos' },
     { name: 'Sobre', href: '#sobre' },
+    { name: 'Portfólio', href: '/portfolio', external: false },
+    { name: 'Eventos', href: '/events', external: false },
     { name: 'Contacto', href: '#contacto' },
   ];
 
@@ -35,7 +39,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         
-        {/* LOGO - Clicar no logo volta ao topo (Hero) */}
+        {/* LOGO */}
         <a href="#home" className="flex items-center gap-2 group">
           <img 
             src={logoMv} 
@@ -47,18 +51,29 @@ const Navbar = () => {
           </span>
         </a>
 
-        <div className="flex items-center gap-8">
-          {/* LINKS DE NAVEGAÇÃO FUNCIONAIS */}
-          <div className="hidden md:flex items-center gap-8">
+        <div className="flex items-center gap-6 md:gap-8">
+          {/* LINKS DE NAVEGAÇÃO */}
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
-              <a 
-                key={link.name} 
-                href={link.href}
-                className="!text-gray-400 hover:!text-white transition-all font-medium text-xs uppercase tracking-[0.2em] relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
-              </a>
+              link.external === false ? (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="!text-gray-400 hover:!text-white transition-all font-medium text-xs uppercase tracking-[0.2em] relative group"
+                >
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
+                </Link>
+              ) : (
+                <a 
+                  key={link.name} 
+                  href={link.href}
+                  className="!text-gray-400 hover:!text-white transition-all font-medium text-xs uppercase tracking-[0.2em] relative group"
+                >
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
+                </a>
+              )
             ))}
           </div>
 

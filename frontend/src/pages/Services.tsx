@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Code2, Smartphone, Globe, BarChart3 } from 'lucide-react';
-import { useSettings } from '../hooks/useSettings'; // Importando o hook
+import { useSettings } from '../hooks/useSettings'; 
 
 const Services = () => {
   const { settings, loading } = useSettings();

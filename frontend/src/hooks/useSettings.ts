@@ -1,18 +1,33 @@
-import { useState, useEffect } from 'react';
+// src/hooks/useSettings.ts
+import { useContext } from 'react';
+import { ContentContext } from '../context/ContentContext';
 
-export const useSettings = () => {
-  const [settings, setSettings] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
+interface UseSettingsReturn {
+  settings: Record<string, string>;
+  loading: boolean;
+  updateSetting: (key: string, value: string) => void;
+  resetSettings: () => void;
+}
 
-  useEffect(() => {
-    fetch('http://localhost:3000/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        setSettings(data); // O backend já retorna no formato { key: value }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+export const useSettings = (): UseSettingsReturn => {
+  const context = useContext(ContentContext);
+  
+  if (!context) {
+    // Fallback quando o contexto não está disponível
+    return {
+      settings: {},
+      loading: false,
+      updateSetting: () => {},
+      resetSettings: () => {}
+    };
+  }
 
-  return { settings, loading };
+  const { content, updateContent, resetContent } = context;
+
+  return {
+    settings: content,
+    loading: false,
+    updateSetting: updateContent,
+    resetSettings: resetContent
+  };
 };
