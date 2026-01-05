@@ -22,6 +22,7 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import Events from './pages/Events';
 import Portfolio from './pages/Portfolio';
+import AboutComplete from './pages/AboutComplete';
 
 // Admin components
 import Login from './auth/Login';
@@ -140,6 +141,8 @@ function AppContent() {
               {/* Páginas Externas (Landing) */}
               <Route path="/events" element={<><Navbar /><Events /><Footer /><WhatsappButton /></>} />
               <Route path="/portfolio" element={<><Navbar /><Portfolio /><Footer /><WhatsappButton /></>} />
+
+              <Route path="/sobre-completo" element={<><Navbar /><AboutComplete /><Footer /><WhatsappButton /></>} />
               
               {/* Autenticação (Redireciona se já estiver logado) */}
               <Route path="/auth/login" element={
@@ -159,6 +162,7 @@ function AppContent() {
                 <Route path="portifolio" element={<PortifolioPreview />} />
                 <Route path="contactos" element={<ContactosPreview />} />
                 <Route path="newsletter" element={<NewsletterManager />} />
+
               </Route>
               
               {/* 404 - Volta para Home */}
