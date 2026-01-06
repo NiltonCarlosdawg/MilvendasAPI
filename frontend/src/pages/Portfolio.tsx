@@ -1,7 +1,7 @@
 // src/pages/Portfolio.tsx - VERSÃO SINCRONIZADA COM ADMIN
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {  Code, Smartphone, Globe, Eye, Loader2} from 'lucide-react';
+import { Code, Smartphone, Globe, Eye, Loader2, X, ExternalLink, Calendar, Tag, Layers } from 'lucide-react';
 
 interface PortfolioItemType {
   id: string;
@@ -157,53 +157,75 @@ const Portfolio = () => {
           </AnimatePresence>
         </div>
 
-        {/* Modal (Utilizando os dados sincronizados) */}
+        {/* Modal */}
         <AnimatePresence>
           {selectedProject && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white dark:bg-slate-900 rounded-[3rem] max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                exit={{ opacity: 0, scale: 0.9 }} 
+                className="bg-white dark:bg-slate-900 rounded-[3rem] max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+              >
                 <div className="relative h-64 md:h-[500px]">
                   <img 
                     src={`${MEDIA_BASE_URL}${selectedProject.mediaUrl}`} 
                     className="w-full h-full object-cover" 
                     alt={selectedProject.title} 
                   />
-                  <button onClick={() => setSelectedProject(null)} className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full text-white border border-white/20">✕</button>
+                  <button 
+                    onClick={() => setSelectedProject(null)} 
+                    className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full text-white border border-white/20"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
                 <div className="p-8 md:p-16">
-                  <span className="text-blue-600 font-black uppercase tracking-widest">{selectedProject.category}</span>
-                  <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mt-4 mb-8 tracking-tighter">{selectedProject.title}</h2>
+                  <div className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-widest mb-2">
+                    <Layers size={14} />
+                    {selectedProject.category}
+                  </div>
+                  <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mt-4 mb-8 tracking-tighter">
+                    {selectedProject.title}
+                  </h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
                     <div className="space-y-4">
-                       <h4 className="font-black text-slate-900 dark:text-white uppercase text-sm">Sobre o Projeto</h4>
-                       <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">{selectedProject.description}</p>
+                      <h4 className="font-black text-slate-900 dark:text-white uppercase text-sm">Sobre o Projeto</h4>
+                      <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">
+                        {selectedProject.description}
+                      </p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl space-y-6">
-                       <div>
-                         <p className="text-xs font-black text-blue-500 uppercase mb-1">Cliente</p>
-                         <p className="font-bold dark:text-white text-xl">{selectedProject.client || 'N/A'}</p>
-                       </div>
-                       <div>
-                         <p className="text-xs font-black text-blue-500 uppercase mb-1">Ano de Conclusão</p>
-                         <p className="font-bold dark:text-white text-xl">{selectedProject.year || '2024'}</p>
-                       </div>
+                      <div>
+                        <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+                          <Calendar size={14} /> Data
+                        </div>
+                        <span className="font-bold dark:text-white text-xl">{selectedProject.year || '2024'}</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+                          <Tag size={14} /> Cliente
+                        </div>
+                        <span className="font-bold dark:text-white text-xl">{selectedProject.client || 'Particular'}</span>
+                      </div>
                     </div>
                   </div>
 
                   <a 
                     href={`https://wa.me/244922965959?text=Olá! Vi o projeto "${selectedProject.title}" e gostaria de algo semelhante.`}
                     target="_blank"
-                    className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-3xl text-center block shadow-2xl shadow-blue-500/20 transition-all scale-100 hover:scale-[1.02]"
+                    rel="noopener noreferrer"
+                    className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-3xl text-center block shadow-2xl shadow-blue-500/20 transition-all scale-100 hover:scale-[1.02] flex items-center justify-center gap-2"
                   >
                     SOLICITAR ORÇAMENTO PARA PROJETO SIMILAR
+                    <ExternalLink size={18} />
                   </a>
                 </div>
               </motion.div>
             </div>
           )}
         </AnimatePresence>
-
       </div>
     </section>
   );

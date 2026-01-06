@@ -63,6 +63,13 @@ const Hero = () => {
             >
               {content.button_text}
             </motion.a>
+            
+            <a 
+              href="#contacto"
+              className="bg-transparent border-2 border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-8 py-5 rounded-full font-bold transition-all"
+            >
+              Saber Mais
+            </a>
           </div>
         </motion.div>
 

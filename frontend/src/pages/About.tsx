@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import logoMv from '../assets/logo-mv.svg';
 import { useSettings } from '../hooks/useSettings';
-
 import { Link } from 'react-router-dom';
 
 const About = () => {
@@ -81,7 +80,7 @@ const About = () => {
             {/* Botão para ver apresentação completa - SEM TARGET BLANK */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                to="/sobre-completo" // ← SEM target="_blank"
+                to="/sobre-completo"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,6 +103,7 @@ const About = () => {
         </div>
       </section>
       
+      {/* Seção da equipe */}
       
     </>
   );

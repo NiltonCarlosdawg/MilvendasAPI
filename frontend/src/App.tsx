@@ -8,12 +8,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Componentes Globais
 import Splash from './components/Splash';
-//import Customizer from './components/Customizer';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsappButton from './components/WhatsappButton';
-import PartnersCarousel from './components/PartnersCarousel'; // ← ADICIONADO AQUI
-
+import PartnersCarousel from './components/PartnersCarousel';
 
 // Páginas Públicas
 import Hero from './pages/Hero';
@@ -66,7 +64,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // ========================================================
 // PÁGINA PRINCIPAL (ONE-PAGE LOGIC)
 // ========================================================
-// Atualize o componente MainPage no App.tsx:
 const MainPage: React.FC = () => {
   const location = useLocation();
   
@@ -141,7 +138,6 @@ function AppContent() {
               {/* Páginas Externas (Landing) */}
               <Route path="/events" element={<><Navbar /><Events /><Footer /><WhatsappButton /></>} />
               <Route path="/portfolio" element={<><Navbar /><Portfolio /><Footer /><WhatsappButton /></>} />
-
               <Route path="/sobre-completo" element={<><Navbar /><AboutComplete /><Footer /><WhatsappButton /></>} />
               
               {/* Autenticação (Redireciona se já estiver logado) */}
@@ -162,7 +158,6 @@ function AppContent() {
                 <Route path="portifolio" element={<PortifolioPreview />} />
                 <Route path="contactos" element={<ContactosPreview />} />
                 <Route path="newsletter" element={<NewsletterManager />} />
-
               </Route>
               
               {/* 404 - Volta para Home */}

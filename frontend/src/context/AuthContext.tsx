@@ -1,6 +1,4 @@
-// src/context/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface User {
   id: string;
@@ -15,23 +13,25 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // URL base da sua API (ajuste conforme seu ambiente)
-const API_URL = import.meta.env.VITE_API_URL || 'https:/milvendasapi.onrender.com/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://milvendasapi.onrender.com/api/v1';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('@MilVendas:token'));
   const [loading, setLoading] = useState(true);
 
   // 1. Verificar se existe um token ao carregar o app
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('@MilVendas:token');
+      const storedToken = localStorage.getItem('@MilVendas:token');
       
-      if (!token) {
+      if (!storedToken) {
         setLoading(false);
         return;
       }
@@ -40,13 +40,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Valida o token buscando o perfil do usuário no backend
         const response = await fetch(`${API_URL}/users/me`, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${storedToken}`
           }
         });
 
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
+          setToken(storedToken);
         } else {
           // Se o token for inválido ou expirado, limpa tudo
           logout();
@@ -78,6 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Sucesso: Salva Token e dados
     localStorage.setItem('@MilVendas:token', data.token);
+    setToken(data.token);
     setUser(data.user);
   };
 
@@ -85,11 +87,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     localStorage.removeItem('@MilVendas:token');
     setUser(null);
+    setToken(null);
+    window.location.href = '/auth/login';
   };
 
   return (
     <AuthContext.Provider value={{ 
       user, 
+      token,
       isAuthenticated: !!user, 
       loading, 
       login, 
@@ -102,8 +107,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+
   return context;
 };

@@ -100,7 +100,7 @@ const Navbar = () => {
               src={logoMv} 
               alt="Logo Mil Vendas" 
               // ALTERADO: w-12 h-12 md:w-16 md:h-16 (aumentei consideravelmente)
-              className="w-16 h-16 md:w-20 md:h-20 filter brightness-0 !invert transition-transform group-hover:scale-110" 
+              className="w-12 h-12 md:w-16 md:h-16 filter brightness-0 !invert transition-transform group-hover:scale-110" 
             />
             <span className="text-lg sm:text-xl md:text-2xl font-bold !text-white tracking-tighter whitespace-nowrap">
               {/* Texto removido conforme seu código */}
@@ -207,7 +207,7 @@ const Navbar = () => {
                     <img 
                       src={logoMv} 
                       alt="Logo" 
-                      className="w-28 h-28 filter brightness-0 !invert" // ALTERADO: w-14 h-14
+                      className="w-14 h-14 filter brightness-0 !invert" // ALTERADO: w-14 h-14
                     />
                     <span className="text-xl font-bold !text-white">MIL VENDAS</span>
                   </div>

@@ -22,8 +22,6 @@ const Contact = () => {
         
         if (Array.isArray(data)) {
           const config = data.reduce((acc: any, curr: any) => {
-            // Normalizamos a chave: tiramos espaços e pomos em minúsculas
-            // Ex: "E-mail Oficial" vira "email_oficial"
             if (curr.key) {
               const normalizedKey = curr.key.toLowerCase().replace(/[\s-]/g, '_');
               acc[normalizedKey] = curr.value;
@@ -60,19 +58,14 @@ const Contact = () => {
     }
   };
 
-  /**
-   * MAPEAMENTO DE CHAVES (Com base no teu Admin)
-   * Tentamos ler a chave exata do Admin, depois a normalizada, depois o fallback.
-   */
   const displayPhone = settings.telefone_whatsapp || settings.contact_phone || '930 000 000';
   const displayEmail = settings.email_oficial || settings.contact_email || 'geral@milvendas.com';
   const displayAddress = settings.endereco_sede || settings.contact_address || 'Benguela, Angola';
   
-  // Limpa o número para o link do WhatsApp (remove espaços)
   const whatsappNumber = displayPhone.toString().replace(/\s+/g, '').replace('+', '');
 
   return (
-    <section id="contato" className="py-24 relative px-6 bg-slate-950 min-h-screen">
+    <section id="contacto" className="py-24 relative px-6 bg-slate-950 min-h-screen">
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -87,7 +80,7 @@ const Contact = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 items-stretch">
           
-          {/* INFO DE CONTACTO (Sincronizado com Imagem 2 e 3) */}
+          {/* INFO DE CONTACTO */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -98,7 +91,9 @@ const Contact = () => {
               
               <div className="space-y-8">
                 <div className="flex items-start gap-5">
-                  <div className="p-3 bg-blue-600/20 rounded-xl text-blue-500 border border-blue-500/10"><MapPin size={24} /></div>
+                  <div className="p-3 bg-blue-600/20 rounded-xl text-blue-500 border border-blue-500/10">
+                    <MapPin size={24} />
+                  </div>
                   <div>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Localização</p>
                     <p className="text-white font-semibold text-lg">{displayAddress}</p>
@@ -106,7 +101,9 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start gap-5">
-                  <div className="p-3 bg-blue-600/20 rounded-xl text-blue-500 border border-blue-500/10"><Mail size={24} /></div>
+                  <div className="p-3 bg-blue-600/20 rounded-xl text-blue-500 border border-blue-500/10">
+                    <Mail size={24} />
+                  </div>
                   <div>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Email</p>
                     <p className="text-white font-semibold text-lg">{displayEmail}</p>
@@ -114,7 +111,9 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start gap-5">
-                  <div className="p-3 bg-blue-600/20 rounded-xl text-blue-500 border border-blue-500/10"><Phone size={24} /></div>
+                  <div className="p-3 bg-blue-600/20 rounded-xl text-blue-500 border border-blue-500/10">
+                    <Phone size={24} />
+                  </div>
                   <div>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Telefone</p>
                     <p className="text-white font-semibold text-lg">{displayPhone}</p>
@@ -136,7 +135,7 @@ const Contact = () => {
             </div>
           </motion.div>
 
-          {/* FORMULÁRIO (Igual à Imagem 2) */}
+          {/* FORMULÁRIO */}
           <motion.div 
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
