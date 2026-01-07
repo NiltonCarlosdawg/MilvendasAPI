@@ -1,5 +1,5 @@
 // src/components/Navbar.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Menu, X, ArrowRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -11,7 +11,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, setTheme } = useAppearance();
   const location = useLocation();
-  const menuRef = useRef<HTMLDivElement>(null);
+ 
 
   // MANTENDO A TUA LÓGICA DE LINKS ORIGINAL
   const navLinks = [

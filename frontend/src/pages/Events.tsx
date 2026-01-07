@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Users, Phone, Loader2, CheckCircle2, X, ArrowRight, Bell } from 'lucide-react';
+import { Users, Phone, Loader2, CheckCircle2, X, Bell } from 'lucide-react';
 
 interface EventItemType {
   id: string;

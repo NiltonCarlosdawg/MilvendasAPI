@@ -27,12 +27,12 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.token); // Guarda o token no Contexto e LocalStorage
+        await login(email, password); // Guarda o token no Contexto e LocalStorage
         navigate('/admin/dashboard'); // Redireciona para o painel
       } else {
         setError(data.message || 'Credenciais inválidas. Tente novamente.');
       }
-    } catch (err) {
+    } catch  {
       setError('Erro ao conectar com o servidor da Mil Vendas.');
     } finally {
       setLoading(false);

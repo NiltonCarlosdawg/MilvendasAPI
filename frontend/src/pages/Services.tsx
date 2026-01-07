@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { useSettings } from '../hooks/useSettings';
@@ -6,7 +5,7 @@ import { useSettings } from '../hooks/useSettings';
 const Services = () => {
   const { settings } = useSettings();
 
-  // Configuração de animação para o container (efeito cascata)
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

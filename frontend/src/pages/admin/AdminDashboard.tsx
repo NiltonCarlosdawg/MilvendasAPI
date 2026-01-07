@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Trash2, Upload, LogOut, PlusCircle, Loader2, 
-  Calendar, Briefcase, ChevronRight, CheckCircle2, AlertCircle 
+  Calendar, Briefcase, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 
 const AdminDashboard = () => {

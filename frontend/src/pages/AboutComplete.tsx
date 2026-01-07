@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Target, 
@@ -9,7 +8,6 @@ import {
   Globe, 
   Users, 
   FileText,
-  Home,
   ArrowLeft,
   Shield,
   Award,
