@@ -1,111 +1,134 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import logoMv from '../assets/logo-mv.svg';
 import { useSettings } from '../hooks/useSettings';
 import { Link } from 'react-router-dom';
+import { Target, Eye, ShieldCheck, CheckCircle2, FileText } from 'lucide-react';
 
 const About = () => {
-  const { settings, loading } = useSettings();
-
-  // Conteúdo baseado na apresentação da empresa
-  const defaultContent = {
-    title: "Mil Vendas Consultoria",
-    description: "Empresa angolana especializada em serviços técnicos de telecomunicações, com foco em planeamento, instalação, optimização e manutenção de redes e infraestruturas críticas. Atuamos como parceiro técnico de operadoras e integradores.",
-    features: [
-      'Planejamento & Otimização RF',
-      'Instalação & Montagem de Infraestruturas',
-      'Operação & Manutenção (O&M)',
-      'Redes IT, VoIP e Soluções Software'
-    ]
-  };
+  const { settings } = useSettings();
 
   const content = {
-    title: settings['about_title'] || defaultContent.title,
-    description: settings['about_description'] || defaultContent.description,
-    features: [
-      settings['about_feature_1'] || defaultContent.features[0],
-      settings['about_feature_2'] || defaultContent.features[1],
-      settings['about_feature_3'] || defaultContent.features[2],
-      settings['about_feature_4'] || defaultContent.features[3],
-    ]
+    title: settings['about_title'] || "Mil Vendas Consultoria",
+    description: settings['about_description'] || "Empresa angolana especializada em serviços técnicos de telecomunicações, focada em infraestruturas críticas e parcerias estratégicas.",
   };
 
-  if (loading && Object.keys(settings).length === 0) {
-    return <div className="py-24 bg-white dark:bg-slate-900 min-h-[500px] transition-colors duration-500" />;
-  }
+  const pillars = [
+    {
+      icon: <Target className="text-blue-500" size={24} />,
+      title: "Missão",
+      text: "Entregar excelência técnica em telecomunicações e engenharia, conectando Angola ao futuro."
+    },
+    {
+      icon: <Eye className="text-indigo-500" size={24} />,
+      title: "Visão",
+      text: "Ser a referência nacional em inovação e manutenção de infraestruturas críticas até 2027."
+    },
+    {
+      icon: <ShieldCheck className="text-emerald-500" size={24} />,
+      title: "Valores",
+      text: "Integridade, segurança operacional e compromisso rigoroso com os prazos dos nossos parceiros."
+    }
+  ];
 
   return (
-    <>
-      <section id="sobre" className="py-24 bg-white dark:bg-slate-800/10 text-slate-900 dark:text-white relative px-6 transition-colors duration-500">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+    <section id="sobre" className="py-24 bg-white dark:bg-slate-900 overflow-hidden transition-colors duration-500">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        
+        {/* SUGESTÃO 4: LAYOUT SPLIT (Imagem + Texto) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
           
+          {/* Lado Esquerdo: Composição de Imagem */}
           <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="flex justify-center order-2 md:order-1"
+            className="relative"
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-blue-600/10 dark:bg-blue-600/20 blur-[100px] rounded-full transition-colors duration-500"></div>
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <img 
-                src={logoMv} 
-                alt="Sobre MV" 
-                className="relative z-10 w-72 h-72 md:w-96 md:h-96 object-contain filter brightness-0 dark:invert drop-shadow-2xl transition-all duration-500" 
+                src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1974" 
+                alt="Equipa Mil Vendas" 
+                className="w-full h-[500px] object-cover"
               />
+              <div className="absolute inset-0 bg-blue-600/10 mix-blend-multiply" />
             </div>
+            
+            {/* Badge Flutuante de Autoridade */}
+            <motion.div 
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="absolute -bottom-6 -right-6 bg-blue-600 text-white p-8 rounded-2xl shadow-xl hidden md:block"
+            >
+              <div className="text-4xl font-black">1+</div>
+              <div className="text-xs uppercase tracking-widest opacity-80">Anos de Experiência</div>
+            </motion.div>
           </motion.div>
 
+          {/* Lado Direito: Texto e Diferenciais */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="order-1 md:order-2"
           >
-            <h2 className="text-4xl font-bold mb-6 transition-colors duration-500">{content.title}</h2>
-            <p className="text-slate-600 dark:text-gray-400 text-lg leading-relaxed mb-6 transition-colors duration-500">
+            <h2 className="text-blue-600 font-black uppercase tracking-tighter text-sm mb-4">
+              Quem Somos
+            </h2>
+            <h3 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 leading-tight">
+              {content.title}
+            </h3>
+            <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
               {content.description}
             </p>
-            
-            <ul className="space-y-4 mb-8">
-              {content.features.map((item, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-blue-600/10 dark:bg-blue-600/20 rounded flex items-center justify-center text-blue-600 dark:text-blue-500 font-bold transition-colors duration-500">
-                    ✓
-                  </div>
-                  <span className="text-slate-700 dark:text-gray-200 transition-colors duration-500">{item}</span>
-                </li>
-              ))}
-            </ul>
 
-            {/* Botão para ver apresentação completa - SEM TARGET BLANK */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="space-y-4 mb-10">
+              {['Sites Corporativos Profissionais', 'Manutenção Preventiva Especializada', 'Equipa Técnica Certificada'].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300 font-bold">
+                  <CheckCircle2 className="text-blue-500" size={20} />
+                  {item}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-4">
               <Link
-                to="/sobre-completo"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                to="/sobre"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Ver Apresentação Completa
+                <FileText size={20} />
+                História Completa
               </Link>
-              
-              <a
-                href="#contacto"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 font-semibold rounded-xl transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                Contactar Agora
-              </a>
             </div>
           </motion.div>
         </div>
-      </section>
-      
-      {/* Seção da equipe */}
-      
-    </>
+
+        {/* SUGESTÃO 3: PILARES (Missão, Visão, Valores) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {pillars.map((pillar, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+              className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all group"
+            >
+              <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center mb-6 shadow-md group-hover:bg-blue-600 group-hover:text-white transition-all">
+                {pillar.icon}
+              </div>
+              <h4 className="text-xl font-black text-slate-900 dark:text-white mb-3">
+                {pillar.title}
+              </h4>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                {pillar.text}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+      </div>
+    </section>
   );
 };
 

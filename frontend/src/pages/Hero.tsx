@@ -1,91 +1,106 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import logoMv from '../assets/logo-mv.svg';
-import { useSettings } from '../hooks/useSettings';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const slides = [
+  // SLIDE 1: Foco na Visão Macro e Parceria Estratégica
+  {
+    title: "Impulsionamos o Futuro dos Negócios em Angola",
+    // A descrição não diz "o que" fazem, mas "como" o cliente se beneficia.
+    desc: "Mais do que consultoria, somos parceiros estratégicos na transformação digital e no crescimento sustentável da sua empresa perante os desafios do mercado.",
+    // Imagem sugerida: Algo que remeta a crescimento, cidade moderna ou networking empresarial de alto nível.
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070", // Exemplo: Arranha-céus corporativos
+    button: "Conheça Nossa Visão"
+  },
+
+  // SLIDE 2: Foco na Expertise Técnica/Inovação (sem listar serviços)
+  {
+    title: "Soluções Inteligentes para Desafios Complexos",
+    // Foca na capacidade de resolver problemas difíceis usando tecnologia.
+    desc: "Conectamos inovação tecnológica a resultados práticos. Otimizamos infraestruturas e processos cruciais para a excelência operacional na era digital.",
+    // Imagem sugerida: Algo tecnológico, dados, redes ou infraestrutura abstrata.
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072", // Exemplo: Rede global/tecnologia
+    button: "Nossas Especialidades"
+  },
+
+  // SLIDE 3: Foco em Resultados e Liderança de Mercado
+  {
+    title: "Redefinindo Padrões de Desempenho",
+    // Foca no resultado final para o cliente: ser líder.
+    desc: "Estratégias comprovadas que elevam a sua operação. Preparamos o seu negócio não apenas para competir, mas para liderar o seu setor.",
+    // Imagem sugerida: Algo que transmita sucesso, topo, liderança ou uma equipa confiante.
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070", // Exemplo: Equipa em reunião estratégica
+    button: "Veja o Impacto"
+  }
+];
 
 const Hero = () => {
-  const { settings, loading } = useSettings();
+  const [current, setCurrent] = useState(0);
 
-  const defaultContent = {
-    title_part1: "Tecnologia que",
-    title_highlight: "Conecta e Inova",
-    description: "A Mil Vendas entrega soluções digitais robustas, focadas na melhor experiência para o seu cliente.",
-    button_text: "Contactar Equipa",
-    whatsapp_number: "244922965959"
-  };
-
-  const content = {
-    title_part1: settings['hero_title_1'] || defaultContent.title_part1,
-    title_highlight: settings['hero_title_highlight'] || defaultContent.title_highlight,
-    description: settings['hero_description'] || defaultContent.description,
-    button_text: settings['hero_button_text'] || defaultContent.button_text,
-    whatsapp: settings['hero_whatsapp'] || defaultContent.whatsapp_number
-  };
-
-  const whatsappUrl = `https://wa.me/${content.whatsapp}?text=Olá! Gostaria de falar sobre um projeto com a Mil Vendas.`;
-
-  if (loading && Object.keys(settings).length === 0) {
-    // Skeleton adaptável ao tema
-    return <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-500" />; 
-  }
+  // Auto-play de 5 segundos
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <section id="hero" className="min-h-screen flex items-center relative px-6 overflow-hidden bg-transparent">
-      <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center gap-12 relative z-10">
-        
-        <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex-1"
+    <section className="relative h-screen w-full overflow-hidden bg-slate-900">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0"
         >
-          {/* Cor alterada para text-slate-900 (light) e text-white (dark) */}
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 dark:text-white leading-tight transition-colors duration-500">
-            {content.title_part1} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-600">
-              {content.title_highlight}
-            </span>
-          </h1>
+          {/* Imagem de Fundo com Overlay para leitura */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] scale-110"
+            style={{ backgroundImage: `url(${slides[current].image})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/60 to-transparent" />
           
-          {/* Cor do parágrafo ajustada para contraste em ambos os modos */}
-          <p className="mt-8 text-xl text-slate-600 dark:text-gray-400 max-w-lg transition-colors duration-500">
-            {content.description}
-          </p>
-
-          <div className="mt-10 flex gap-4">
-            <motion.a 
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05, boxShadow: "0px 0px 30px rgba(59,130,246,0.4)" }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-full font-bold shadow-lg transition-all text-lg"
+          {/* Conteúdo Centralizado */}
+          <div className="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-center">
+            <motion.h1 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-5xl md:text-7xl font-black text-white mb-6 max-w-2xl"
             >
-              {content.button_text}
-            </motion.a>
-            
-            <a 
-              href="#contacto"
-              className="bg-transparent border-2 border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-8 py-5 rounded-full font-bold transition-all"
+              {slides[current].title}
+            </motion.h1>
+            <motion.p 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-xl text-slate-200 mb-10 max-w-xl"
             >
-              Saber Mais
-            </a>
+              {slides[current].desc}
+            </motion.p>
+            <motion.button
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="w-fit px-8 py-4 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition-all"
+            >
+              {slides[current].button}
+            </motion.button>
           </div>
         </motion.div>
+      </AnimatePresence>
 
-        {/* LOGO SVG com filtro inteligente */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.5, rotate: -5 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="flex-1 flex justify-center"
-        >
-          <img 
-            src={logoMv} 
-            alt="Mil Vendas" 
-            className="w-72 h-72 md:w-[500px] md:h-[500px] object-contain filter drop-shadow-[0_0_40px_rgba(59,130,246,0.2)] brightness-0 dark:invert transition-all duration-500"
+      {/* Navegação (Dots) */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3">
+        {slides.map((_, i) => (
+          <button 
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`h-2 transition-all rounded-full ${current === i ? 'w-8 bg-blue-500' : 'w-2 bg-white/50'}`}
           />
-        </motion.div>
+        ))}
       </div>
     </section>
   );

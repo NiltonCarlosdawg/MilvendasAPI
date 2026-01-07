@@ -21,6 +21,7 @@ import Contact from './pages/Contact';
 import Events from './pages/Events';
 import Portfolio from './pages/Portfolio';
 import AboutComplete from './pages/AboutComplete';
+import News from './pages/News';
 
 // Admin components
 import Login from './auth/Login';
@@ -139,7 +140,7 @@ function AppContent() {
               <Route path="/events" element={<><Navbar /><Events /><Footer /><WhatsappButton /></>} />
               <Route path="/portfolio" element={<><Navbar /><Portfolio /><Footer /><WhatsappButton /></>} />
               <Route path="/sobre-completo" element={<><Navbar /><AboutComplete /><Footer /><WhatsappButton /></>} />
-              
+              <Route path="/news" element={<><Navbar /><News /><Footer /><WhatsappButton /></>} />
               {/* Autenticação (Redireciona se já estiver logado) */}
               <Route path="/auth/login" element={
                 user ? <Navigate to="/auth/admin/dashboard" replace /> : <Login />
