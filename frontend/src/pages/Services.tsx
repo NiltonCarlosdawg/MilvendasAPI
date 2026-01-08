@@ -5,7 +5,6 @@ import { useSettings } from '../hooks/useSettings';
 const Services = () => {
   const { settings } = useSettings();
 
-  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -19,117 +18,90 @@ const Services = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
-  // Lista de Serviços com IMAGENS CORPORATIVAS
   const servicesList = [
     {
       title: settings['service_1_title'] || 'Engenharia de Telecomunicações',
       desc: settings['service_1_desc'] || 'Planeamento e otimização de redes críticas. A nossa equipa técnica garante conectividade estável no terreno.',
-      // Imagem: Equipa técnica/engenheiros em campo ou data center
       image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=2070&auto=format&fit=crop",
     },
     {
       title: settings['service_2_title'] || 'Desenvolvimento de Software',
       desc: settings['service_2_desc'] || 'Plataformas digitais à medida. Os nossos developers criam sistemas que aceleram os seus processos de negócio.',
-      // Imagem: Equipa de desenvolvimento a colaborar
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=2070&auto=format&fit=crop",
     },
     {
-      title: settings['service_3_title'] || 'Soluções Mobile & Apps',
-      desc: settings['service_3_desc'] || 'Aplicações nativas focadas na experiência do utilizador, desenhadas para conectar a sua empresa aos clientes.',
-      // Imagem: Profissionais a analisar UX/UI em dispositivos móveis
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
-    },
-    {
-      title: settings['service_4_title'] || 'Consultoria Estratégica & O&M',
-      desc: settings['service_4_desc'] || 'Gestão de infraestruturas e consultoria de TI para assegurar a continuidade e o crescimento operacional.',
-      // Imagem: Reunião executiva/estratégica
-      image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop",
+      title: settings['service_3_title'] || 'Manutenção Industrial',
+      desc: settings['service_3_desc'] || 'Suporte técnico especializado para infraestruturas de energia e sistemas críticos 24/7.',
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070&auto=format&fit=crop",
     }
   ];
 
   return (
-    <section id="servicos" className="py-24 bg-slate-950 relative overflow-hidden">
-      {/* Background Decorativo Subtil */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[100px]" />
-        <div className="absolute -bottom-[20%] -left-[10%] w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[100px]" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-
-        {/* Cabeçalho da Secção */}
-        <div className="text-center mb-20">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-blue-500 font-bold tracking-widest uppercase text-sm bg-blue-500/10 px-4 py-2 rounded-full"
-          >
-            O Que Fazemos
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            viewport={{ once: true }}
-            className="mt-6 text-4xl md:text-5xl font-black text-white"
-          >
-            Expertise Humana, <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-              Resultados Tecnológicos
-            </span>
-          </motion.h2>
+    /* bg-transparent para revelar o logo de fundo do App.tsx */
+    <section id="servicos" className="py-24 bg-transparent relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tighter leading-none">
+              Soluções Técnicas <br /> <span className="text-blue-600">de Alta Performance</span>
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
+              Combinamos tecnologia de ponta com execução rigorosa para garantir a continuidade do seu negócio.
+            </p>
+          </div>
         </div>
 
-        {/* Grid de Serviços com Imagens */}
-        <motion.div
+        <motion.div 
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           {servicesList.map((service, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
-              whileHover={{ y: -8 }} // O card sobe ligeiramente
-              className="group relative bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden flex flex-col h-full hover:border-blue-500/50 transition-all duration-500 shadow-lg shadow-black/50"
+              whileHover={{ y: -10 }}
+              className="group relative flex flex-col h-full rounded-[2.5rem] overflow-hidden border border-slate-200/50 dark:border-slate-800/50 shadow-2xl"
             >
-              {/* Contentor da Imagem (Topo) */}
-              <div className="relative h-56 overflow-hidden">
-                {/* Overlay para escurecer a imagem ligeiramente */}
-                <div className="absolute inset-0 bg-slate-900/30 z-10 group-hover:bg-transparent transition-colors duration-500"></div>
+              {/* Imagem com Overlay mais leve para transparência */}
+              <div className="relative h-64 overflow-hidden">
+                <div className="absolute inset-0 bg-blue-600/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
                 <img
                   src={service.image}
                   alt={service.title}
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 opacity-90 dark:opacity-80"
                 />
               </div>
 
-              {/* Contentor do Texto (Base) */}
-              <div className="p-8 flex flex-col flex-grow relative z-20 bg-slate-900">
-                <h3 className="text-xl font-bold text-white mb-4 group-hover:text-blue-400 transition-colors">
+              {/* Contentor do Texto - Glassmorphism Aplicado */}
+              <div className="p-8 flex flex-col flex-grow relative z-20 bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl transition-colors duration-500">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-blue-500 transition-colors">
                   {service.title}
                 </h3>
 
-                <p className="text-slate-400 leading-relaxed text-sm mb-8 flex-grow">
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm mb-8 flex-grow font-medium">
                   {service.desc}
                 </p>
 
                 {/* Link Simulado */}
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-500 group-hover:text-white transition-colors mt-auto cursor-pointer">
+                <div className="flex items-center gap-2 text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-auto cursor-pointer">
                   <span>Saber mais</span>
                   <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </div>
               </div>
               
-               {/* Brilho subtil nas bordas ao passar o rato */}
-               <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-500/20 rounded-3xl pointer-events-none transition-all duration-500"></div>
+               {/* Brilho nas bordas */}
+               <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-500/30 rounded-[2.5rem] pointer-events-none transition-all duration-500"></div>
             </motion.div>
           ))}
         </motion.div>
       </div>
+
+      {/* Elemento decorativo translúcido para ajudar na profundidade */}
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] -z-10" />
     </section>
   );
 };

@@ -42,161 +42,128 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulação de envio (integrar com o seu backend de emails se necessário)
+    // Simulação de envio
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
+      setFormData({ name: '', email: '', subject: 'Novo Projeto', message: '' });
       setTimeout(() => setSuccess(false), 5000);
     }, 2000);
   };
 
-  const contactInfo = [
-    {
-      icon: <Phone className="text-blue-500" />,
-      title: "Telefone & WhatsApp",
-      value: settings['contact_phone'] || "+244 922 965 959",
-      desc: "Segunda a Sexta, 08h às 18h"
-    },
-    {
-      icon: <Mail className="text-indigo-500" />,
-      title: "Email Geral",
-      value: settings['contact_email'] || "geral@milvendas.ao",
-      desc: "Respondemos em até 24 horas"
-    },
-    {
-      icon: <MapPin className="text-emerald-500" />,
-      title: "Sede em Luanda",
-      value: "Nova Vida, Rua 120",
-      desc: "Angola"
-    }
-  ];
-
   return (
-    <section id="contacto" className="py-24 bg-slate-50 dark:bg-slate-950 transition-colors">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    /* bg-transparent para revelar o logo no fundo */
+    <section id="contacto" className="py-24 bg-transparent relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
           
-          {/* LADO ESQUERDO: INFO DE CONTACTO */}
-          <div className="lg:col-span-5">
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-blue-600 font-black uppercase tracking-widest text-sm mb-4">Fala Connosco</h2>
-              <h3 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-8">
-                Pronto para elevar a sua <span className="text-blue-600">infraestrutura?</span>
-              </h3>
-              
-              <div className="space-y-6 mb-12">
-                {contactInfo.map((item, i) => (
-                  <div key={i} className="flex gap-6 p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                      {item.icon}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-tighter">{item.title}</h4>
-                      <p className="text-lg font-black text-slate-900 dark:text-white mt-1">{item.value}</p>
-                      <p className="text-sm text-slate-500 mt-1">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Coluna de Informações: Agora translúcida */}
+          <div className="space-y-12">
+            <div>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tighter leading-none">
+                Vamos Construir o <br /> <span className="text-blue-600">Seu Próximo Projeto</span>
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 font-medium max-w-md">
+                Estamos prontos para oferecer a consultoria e o suporte técnico que a sua infraestrutura exige.
+              </p>
+            </div>
 
-              {/* Horário de Funcionamento Visual */}
-              <div className="p-8 bg-blue-600 rounded-[2.5rem] text-white">
-                <div className="flex items-center gap-4 mb-4">
-                  <Clock size={24} />
-                  <span className="font-black text-xl">Horário de Operação</span>
-                </div>
-                <p className="opacity-90 leading-relaxed">
-                  A nossa equipa de suporte técnico está disponível para emergências 24/7 para clientes com contrato de manutenção ativo.
-                </p>
-              </div>
-            </motion.div>
+            <div className="grid gap-6">
+              {[
+                { icon: <Phone />, label: "Telefone", value: settings['phone'] || "+244 922 965 959" },
+                { icon: <Mail />, label: "Email", value: settings['email'] || "geral@milvendas.ao" },
+                { icon: <MapPin />, label: "Localização", value: settings['address'] || "Nova Vida, Luanda, Angola" },
+                { icon: <Clock />, label: "Horário", value: "Seg - Sex: 08h às 17h" }
+              ].map((item, i) => (
+                <motion.div 
+                  key={i}
+                  whileHover={{ x: 10 }}
+                  className="flex items-center gap-6 p-6 rounded-3xl bg-white/20 dark:bg-slate-800/30 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50"
+                >
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.label}</p>
+                    <p className="text-slate-900 dark:text-white font-bold">{item.value}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          {/* LADO DIREITO: FORMULÁRIO */}
-          <div className="lg:col-span-7">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[3rem] shadow-2xl shadow-slate-200 dark:shadow-none border border-slate-100 dark:border-slate-800"
-            >
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase ml-2">Nome Completo</label>
-                    <input 
-                      required
-                      className="w-full p-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-blue-500 rounded-2xl font-bold text-slate-900 dark:text-white transition-all outline-none"
-                      placeholder="Ex: Nilton Costa"
-                      value={formData.name}
-                      onChange={e => setFormData({...formData, name: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase ml-2">Email Corporativo</label>
-                    <input 
-                      required
-                      type="email"
-                      className="w-full p-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-blue-500 rounded-2xl font-bold text-slate-900 dark:text-white transition-all outline-none"
-                      placeholder="nome@empresa.ao"
-                      value={formData.email}
-                      onChange={e => setFormData({...formData, email: e.target.value})}
-                    />
-                  </div>
-                </div>
+          {/* Formulário: Efeito Vidro Fosco (Glassmorphism) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 md:p-12 rounded-[3rem] border border-white/20 dark:border-slate-800/50 shadow-2xl relative overflow-hidden"
+          >
+            {/* Brilho decorativo interno */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl" />
 
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase ml-2">Assunto da Consulta</label>
-                  <select 
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-blue-500 rounded-2xl font-bold text-slate-900 dark:text-white transition-all outline-none appearance-none"
-                    value={formData.subject}
-                    onChange={e => setFormData({...formData, subject: e.target.value})}
-                  >
-                    <option>Novo Projeto de Telecom</option>
-                    <option>Desenvolvimento de Software</option>
-                    <option>Manutenção Preventiva</option>
-                    <option>Outros Assuntos</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase ml-2">Como podemos ajudar?</label>
-                  <textarea 
+                  <label className="text-xs font-black text-slate-400 uppercase ml-2">Nome Completo</label>
+                  <input 
                     required
-                    rows={5}
-                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-blue-500 rounded-2xl font-bold text-slate-900 dark:text-white transition-all outline-none resize-none"
-                    placeholder="Descreva brevemente a sua necessidade técnica..."
-                    value={formData.message}
-                    onChange={e => setFormData({...formData, message: e.target.value})}
+                    type="text" 
+                    className="w-full p-4 bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all"
+                    placeholder="Ex: João Manuel"
+                    value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase ml-2">Email Corporativo</label>
+                  <input 
+                    required
+                    type="email" 
+                    className="w-full p-4 bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all"
+                    placeholder="joao@empresa.ao"
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+              </div>
 
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-6 bg-blue-600 text-white rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <Loader2 className="animate-spin" />
-                  ) : success ? (
-                    <><CheckCircle2 /> Mensagem Recebida!</>
-                  ) : (
-                    <>
-                      Enviar Solicitação
-                      <Send size={20} />
-                    </>
-                  )}
-                </button>
-              </form>
-            </motion.div>
-          </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase ml-2">Mensagem</label>
+                <textarea 
+                  required
+                  rows={5}
+                  className="w-full p-4 bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all resize-none"
+                  placeholder="Como a Mil Vendas pode ajudar o seu negócio?"
+                  value={formData.message}
+                  onChange={e => setFormData({...formData, message: e.target.value})}
+                />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin" />
+                ) : success ? (
+                  <><CheckCircle2 /> Mensagem Enviada!</>
+                ) : (
+                  <>
+                    Enviar Solicitação
+                    <Send size={20} />
+                  </>
+                )}
+              </button>
+            </form>
+          </motion.div>
+
         </div>
       </div>
+
+      {/* Decoração de fundo translúcida */}
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -z-10" />
     </section>
   );
 };

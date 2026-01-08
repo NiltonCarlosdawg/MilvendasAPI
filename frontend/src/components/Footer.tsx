@@ -16,7 +16,6 @@ const Footer = () => {
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulação de subscrição
     setTimeout(() => {
       setLoading(false);
       setSubscribed(true);
@@ -28,24 +27,24 @@ const Footer = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <footer className="bg-slate-950 text-slate-400 pt-20 pb-10 border-t border-slate-900 relative overflow-hidden">
+    <footer className="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 pt-20 pb-10 border-t border-slate-200 dark:border-slate-900 relative overflow-hidden transition-colors duration-500">
       {/* Glow Effect Background */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-blue-600/5 dark:bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         
-        {/* SECÇÃO DE NEWSLETTER (Adicionada) */}
-        <div className="bg-slate-900/50 border border-slate-800 p-8 md:p-12 rounded-[3rem] mb-20 flex flex-col lg:flex-row items-center justify-between gap-10">
+        {/* SECÇÃO DE NEWSLETTER */}
+        <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-8 md:p-12 rounded-[3rem] mb-20 flex flex-col lg:flex-row items-center justify-between gap-10">
           <div className="max-w-md">
-            <h3 className="text-2xl md:text-3xl font-black text-white mb-3">Fique por dentro da tecnologia em Angola</h3>
-            <p className="text-sm text-slate-400">Receba os nossos relatórios mensais sobre infraestrutura e inovação diretamente no seu email.</p>
+            <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-3">Fique por dentro da tecnologia em Angola</h3>
+            <p className="text-sm">Receba os nossos relatórios mensais sobre infraestrutura e inovação diretamente no seu email.</p>
           </div>
           <form onSubmit={handleSubscribe} className="w-full lg:max-w-md relative">
             <input 
               required
               type="email"
               placeholder="Seu melhor email corporativo"
-              className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl py-5 px-6 outline-none focus:border-blue-600 transition-all text-white font-medium"
+              className="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-2xl py-5 px-6 outline-none focus:border-blue-600 transition-all text-slate-900 dark:text-white font-medium"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -65,13 +64,18 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Branding */}
           <div className="space-y-6">
-            <img src={logoMv} alt="Mil Vendas" className="h-10 w-auto brightness-0 invert" />
+            {/* Ajuste do Logotipo: brightness-0 (preto) no Light Mode, dark:brightness-100 (branco) no Dark Mode */}
+            <img 
+              src={logoMv} 
+              alt="Mil Vendas" 
+              className="h-10 w-auto transition-all duration-300 brightness-0 dark:brightness-100" 
+            />
             <p className="text-sm leading-relaxed">
               Excelência técnica em telecomunicações e engenharia. Parceiros estratégicos na construção da Angola digital.
             </p>
             <div className="flex gap-4">
               {[Linkedin, Facebook, Instagram].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all">
+                <a key={i} href="#" className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all">
                   <Icon size={18} />
                 </a>
               ))}
@@ -80,7 +84,7 @@ const Footer = () => {
 
           {/* Navegação */}
           <div>
-            <h4 className="text-white font-bold mb-6 flex items-center gap-2">
+            <h4 className="text-slate-900 dark:text-white font-bold mb-6 flex items-center gap-2">
               <span className="w-8 h-[2px] bg-blue-600"></span> Links Úteis
             </h4>
             <ul className="space-y-3 text-sm">
@@ -95,12 +99,12 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Serviços (Dinâmico se quiseres) */}
+          {/* Especialidades */}
           <div>
-            <h4 className="text-white font-bold mb-6 flex items-center gap-2">
+            <h4 className="text-slate-900 dark:text-white font-bold mb-6 flex items-center gap-2">
               <span className="w-8 h-[2px] bg-blue-600"></span> Especialidades
             </h4>
-            <ul className="space-y-3 text-sm text-slate-400">
+            <ul className="space-y-3 text-sm">
               <li>Engenharia de Redes RF</li>
               <li>Manutenção Crítica O&M</li>
               <li>Desenvolvimento de Software</li>
@@ -110,7 +114,7 @@ const Footer = () => {
 
           {/* Contacto */}
           <div>
-            <h4 className="text-white font-bold mb-6 flex items-center gap-2">
+            <h4 className="text-slate-900 dark:text-white font-bold mb-6 flex items-center gap-2">
               <span className="w-8 h-[2px] bg-blue-600"></span> Contacto
             </h4>
             <div className="space-y-4 text-sm">
@@ -122,7 +126,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-8 border-t border-slate-200 dark:border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-xs">© {currentYear} Mil Vendas Consultoria. Todos os direitos reservados.</p>
           <div className="flex items-center gap-6">
             <button onClick={scrollToTop} className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">

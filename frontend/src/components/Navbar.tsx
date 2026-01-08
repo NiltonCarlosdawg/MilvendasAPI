@@ -11,16 +11,15 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, setTheme } = useAppearance();
   const location = useLocation();
- 
 
-  // MANTENDO A TUA LÓGICA DE LINKS ORIGINAL
+  // Links atualizados para navegar entre páginas e secções da Home
   const navLinks = [
-    { name: 'Serviços', href: '#servicos', external: false },
-    { name: 'Sobre', href: '#sobre', external: false },
-    { name: 'Portfólio', href: '/portfolio', external: false },
-    { name: 'Eventos', href: '/events', external: false },
-    { name: 'Contacto', href: '#contacto', external: false },
-    { name: 'Blog', href: '/news', external: false },
+    { name: 'Serviços', href: '/#servicos' },
+    { name: 'Sobre', href: '/#sobre' },
+    { name: 'Portfólio', href: '/portfolio' },
+    { name: 'Eventos', href: '/events' },
+    { name: 'Blog', href: '/news' },
+    { name: 'Contacto', href: '/#contacto' },
   ];
 
   useEffect(() => {
@@ -29,82 +28,67 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fechar menu ao mudar de rota
   useEffect(() => {
     setIsMenuOpen(false);
-  }, [location]);
-
-  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [location.pathname]);
 
   return (
     <>
       <nav 
-        className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
           scrolled 
-          ? 'py-3 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-2xl border-b border-slate-200/50 dark:border-slate-800/50' 
-          : 'py-6 bg-transparent'
+            ? 'py-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shadow-xl' 
+            : 'py-8 bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          
-          {/* LOGO */}
-          <Link to="/" className="relative z-10 group">
+          <Link to="/" className="relative z-10 flex items-center gap-3 group">
+            {/* LÓGICA DO LOGOTIPO: 
+                brightness-0: Transforma letras brancas em preto no Light Mode
+                dark:brightness-100: Mantém o branco original no Dark Mode
+            */}
             <img 
               src={logoMv} 
               alt="Mil Vendas" 
-              className={`h-10 md:h-12 transition-all duration-500 ${
-                (theme === 'dark' || scrolled) ? 'brightness-0 invert' : ''
-              }`} 
+              className="h-10 md:h-12 w-auto transition-all duration-300 brightness-0 dark:brightness-100" 
             />
           </Link>
 
-          {/* DESKTOP MENU */}
+          {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
-            <div className="flex items-center gap-6 bg-slate-100/50 dark:bg-slate-900/50 px-6 py-2 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
-              {navLinks.map((link) => (
-                link.href.startsWith('#') ? (
-                  <a 
-                    key={link.name}
-                    href={link.href}
-                    className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    {link.name}
-                  </a>
-                ) : (
-                  <Link
-                    key={link.name}
-                    to={link.href}
-                    className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                )
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* THEME TOGGLE */}
-              <button 
-                onClick={toggleTheme}
-                className="p-3 rounded-xl bg-white dark:bg-slate-900 text-slate-500 hover:text-blue-500 shadow-sm border border-slate-200 dark:border-slate-800 transition-all"
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`text-sm font-black uppercase tracking-widest transition-all hover:text-blue-600 ${
+                  scrolled 
+                    ? 'text-slate-600 dark:text-slate-300' 
+                    : 'text-slate-900 dark:text-white'
+                } ${location.pathname === link.href ? 'text-blue-600' : ''}`}
               >
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
+                {link.name}
+              </Link>
+            ))}
 
-              {/* LOGIN / ADMIN */}
-           
-            
-            </div>
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:scale-110 transition-all"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
           </div>
 
-          {/* MOBILE TOGGLE */}
-          <div className="flex items-center gap-4 lg:hidden">
-            <button onClick={toggleTheme} className="text-slate-500 dark:text-slate-400">
-              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+          {/* Mobile Toggle */}
+          <div className="flex lg:hidden items-center gap-4">
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 text-slate-600 dark:text-slate-300"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button 
-              className="p-2 text-slate-900 dark:text-white" 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 text-slate-900 dark:text-white"
             >
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -112,16 +96,20 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* MOBILE MENU FULLSCREEN */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[90] bg-white dark:bg-slate-950 lg:hidden flex flex-col pt-32 px-10"
+          <motion.div
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            className="fixed inset-0 z-[60] bg-white dark:bg-slate-950 p-10 flex flex-col justify-center"
           >
-            <div className="space-y-6">
+            <button onClick={() => setIsMenuOpen(false)} className="absolute top-10 right-10 text-slate-900 dark:text-white">
+              <X size={40} />
+            </button>
+            
+            <div className="space-y-8">
               {navLinks.map((link, i) => (
                 <motion.div
                   key={link.name}
@@ -129,31 +117,16 @@ const Navbar = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
                 >
-                  {link.href.startsWith('#') ? (
-                    <a 
-                      href={link.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-black text-slate-900 dark:text-white flex items-center justify-between group"
-                    >
-                      {link.name}
-                      <ArrowRight className="opacity-0 group-hover:opacity-100 transition-all text-blue-600" />
-                    </a>
-                  ) : (
-                    <Link
-                      to={link.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-black text-slate-900 dark:text-white flex items-center justify-between group"
-                    >
-                      {link.name}
-                      <ArrowRight className="opacity-0 group-hover:opacity-100 transition-all text-blue-600" />
-                    </Link>
-                  )}
+                  <Link
+                    to={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-5xl font-black text-slate-900 dark:text-white flex items-center justify-between group"
+                  >
+                    {link.name}
+                    <ArrowRight className="text-blue-600" />
+                  </Link>
                 </motion.div>
               ))}
-            </div>
-
-            <div className="mt-auto mb-10 border-t border-slate-100 dark:border-slate-800 pt-10">
-           
             </div>
           </motion.div>
         )}
