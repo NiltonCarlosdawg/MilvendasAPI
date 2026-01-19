@@ -166,21 +166,15 @@ const AboutComplete = () => {
               </div>
               
               <div className="space-y-4 text-white/90 max-w-3xl">
-                <p className="text-lg" >
-                   A <strong className="text-white">Mil Vendas Consultoria</strong> nasceu de uma certeza: as empresas angolanas pagam um preço excessivo pelos seus serviços de telecomunicações e de TI.
-             
-                
-               
-                
-                </p>
-                <p>
-                 Fundada por especialistas do sector, combatemos essa ineficiência com uma proposta clara: garantir economia significativa e otimizar o desempenho da sua infraestrutura de comunicação.
-                </p>
-                <p>   Ao longo dos meses, desenvolvemos metodologias exclusivas de auditoria e negociação. Vamos além da superfície para identificar e corrigir desperdícios ocultos em sua fatura, oportunidades que passam despercebidas pela maioria das empresas.
-                </p>
-                <p>
-                  Nossa equipe, composta por <strong className="text-white">especialistas com conhecimento profundo do mercado angolano</strong>, atua como uma extensão estratégica do seu negócio. Trabalhamos com empresas de todos os portes desde pequenos escritórios até grandes corporações com um compromisso inegociável: entregar resultados mensuráveis e economia garantida. 
-                </p>
+                             
+
+                   <p> A <strong className="text-white">Mil Vendas Consultoria</   strong> nasceu de uma convicção: crescer de forma proativa e responsável, não apenas como empresa, mas também como catalisadora do sucesso de nossos parceiros.
+
+                   <p> Nossa atuação concentra-se na entrega de soluções tecnológicas robustas, sempre alinhadas aos mais altos padrões de qualidade e aos objetivos estratégicos de negócio.</p>
+
+                   <p>Como consultoria, o nosso compromisso é assegurar serviços e produtos da mais<strong className="text-white">alta eficácia e qualidade.</strong>  Através de um portfólio diferenciado proporcionamos aos nossos clientes uma experiência única e sob medida, criando valor e impulsionando resultados.</p>
+                   </p>
+
 
                 <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                   <h4 className="font-semibold text-white mb-2">Missão</h4>
