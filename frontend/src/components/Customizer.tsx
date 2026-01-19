@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppearance } from '../hooks/useAppearance';
 import { Sun, Moon, Type } from 'lucide-react';

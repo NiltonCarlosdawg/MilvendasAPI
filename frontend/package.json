@@ -4,20 +4,20 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-<<<<<<< HEAD
+
     "start": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-=======
 
-   "start": "react-scripts start",
 
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+   
+
+   
+   
   
 
 
->>>>>>> 5058bfb41bf586e92767fb3161585719ee52e57c
+
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -55,10 +55,10 @@
     "globals": "^16.5.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-<<<<<<< HEAD
+
     "vite": "^7.3.0"
-=======
-    "vite": "^7.2.4"
->>>>>>> 5058bfb41bf586e92767fb3161585719ee52e57c
+
+
+
   }
 }

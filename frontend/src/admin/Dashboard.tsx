@@ -38,22 +38,22 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('@MilVendas:token');
-      const headers = { 'Authorization': `Bearer ${token}` };
+  setLoading(true);
+  try {
+    // Removido token não utilizado
+    // Se precisar do token no futuro, adicione aqui
 
-      const [events, portfolio, settings] = await Promise.all([
-        safeFetch(`${API_BASE}/events`),
-        safeFetch(`${API_BASE}/portfolio`),
-        safeFetch(`${API_BASE}/settings`),
-      ]);
+    const [events, portfolio, settings] = await Promise.all([
+      safeFetch(`${API_BASE}/events`),
+      safeFetch(`${API_BASE}/portfolio`),
+      safeFetch(`${API_BASE}/settings`),
+    ]);
 
-      setData({ events, portfolio, settings, newsletter: [] });
-    } finally {
-      setLoading(false);
-    }
-  };
+    setData({ events, portfolio, settings, newsletter: [] });
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => { fetchData(); }, []);
 

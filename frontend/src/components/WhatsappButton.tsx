@@ -1,11 +1,11 @@
-import React from 'react';
+//import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const WhatsappButton = () => {
   return (
     <motion.a
-      href="https://wa.me/244900000000" // Substitua pelo seu número
+      href="https://wa.me/244922965959" // Substitua pelo seu número
       target="_blank"
       rel="noopener noreferrer"
       initial={{ scale: 0 }}

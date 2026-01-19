@@ -8,20 +8,21 @@
 @layer base {
   :root {
     --brand-blue: #3B82F6;
+    --text-light: #1e293b;
+    --text-dark: #f1f5f9;
+    --bg-light: #ffffff;
+    --bg-dark: #0f172a;
   }
 
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 80px;
-    @apply transition-colors duration-500;
+    @apply transition-colors duration-300;
   }
 
-  /* 2. RESET DINÂMICO DO BODY:
-     Definimos as cores base aqui. Se o tema for light, usa bg-white.
-     Se o seletor .dark for detetado no html, usa bg-slate-900.
-  */
+  /* 2. RESET DINÂMICO DO BODY */
   body {
-    @apply bg-white text-slate-900 dark:bg-slate-900 dark:text-white antialiased transition-colors duration-500;
+    @apply bg-white text-slate-900 dark:bg-slate-900 dark:text-white antialiased transition-colors duration-300;
     min-height: 100vh;
   }
 
@@ -30,25 +31,33 @@
   }
 }
 
-/* 3. SCROLLBAR ADAPTÁVEL:
-   Usamos as cores que mudam conforme o tema selecionado. */
+/* 3. SCROLLBAR ADAPTÁVEL */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-50 dark:bg-slate-950;
+  @apply bg-slate-100 dark:bg-slate-950;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full border-2 border-transparent bg-clip-content;
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-blue-500;
 }
 
-/* Ajuste para seleção de texto */
+/* 4. SELEÇÃO DE TEXTO */
 ::selection {
   @apply bg-blue-500 text-white;
+}
+
+/* 5. LOGO INTELIGENTE */
+.logo-mv {
+  filter: brightness(0) !important;
+}
+
+.dark .logo-mv {
+  filter: brightness(0) invert(1) !important;
 }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Target, 
@@ -9,7 +8,6 @@ import {
   Globe, 
   Users, 
   FileText,
-  Home,
   ArrowLeft,
   Shield,
   Award,
@@ -18,7 +16,10 @@ import {
   Monitor,
   Database,
   Workflow,
-  Building
+  Building,
+  Phone,
+  Mail,
+  Map
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logoMv from '../assets/logo-mv.svg';
@@ -33,6 +34,16 @@ const AboutComplete = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // URLs das imagens para cada seção
+  const sectionImages = {
+    quemSomos: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+    planeamento: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+    instalacao: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+    redesIt: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+    metodologia: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+    areasAtuacao: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
   };
 
   return (
@@ -85,7 +96,7 @@ const AboutComplete = () => {
             Mil Vendas Consultoria
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-            Serviços profissionais em Telecomunicações, Redes RF e Infraestruturas Técnicas
+            Serviços profissionais em Telecomunicações, TI e Infraestruturas Técnicas
           </p>
         </motion.div>
 
@@ -133,62 +144,103 @@ const AboutComplete = () => {
           </div>
         </motion.div>
 
-        {/* Seção 1: Quem Somos */}
+        {/* Seção 1: Quem Somos COM IMAGEM DE FUNDO */}
         <section id="quem-somos" className="mb-16 scroll-mt-24">
-          <div className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 rounded-2xl p-8 border border-blue-100 dark:border-blue-800/30">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">1. Quem Somos</h2>
+          <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            {/* Imagem de fundo */}
+            <div className="absolute inset-0">
+              <img 
+                src={sectionImages.quemSomos}
+                alt="Equipa técnica Mil Vendas"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-slate-900/80 dark:from-blue-900/90 dark:to-slate-900/90"></div>
             </div>
             
-            <div className="space-y-4 text-slate-700 dark:text-slate-300">
-              <p className="text-lg">
-                A <strong>Mil Vendas Consultoria</strong> é uma empresa angolana especializada em serviços técnicos de telecomunicações, com foco em planeamento, instalação, optimização e manutenção de redes e infraestruturas críticas.
-              </p>
-              <p>
-                Atuamos como <strong>parceiro técnico</strong> de operadoras e integradores, garantindo execução segura, padronizada e alinhada com normas internacionais.
-              </p>
-              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
-                <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Missão</h4>
-                <p>Fornecer soluções técnicas de excelência em telecomunicações, contribuindo para o desenvolvimento tecnológico de Angola.</p>
+            <div className="relative z-10 p-8 md:p-12">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-white">1. Quem Somos</h2>
+              </div>
+              
+              <div className="space-y-4 text-white/90 max-w-3xl">
+                <p className="text-lg" >
+                   A <strong className="text-white">Mil Vendas Consultoria</strong> nasceu de uma certeza: as empresas angolanas pagam um preço excessivo pelos seus serviços de telecomunicações e de TI.
+             
+                
+               
+                
+                </p>
+                <p>
+                 Fundada por especialistas do sector, combatemos essa ineficiência com uma proposta clara: garantir economia significativa e otimizar o desempenho da sua infraestrutura de comunicação.
+                </p>
+                <p>   Ao longo dos meses, desenvolvemos metodologias exclusivas de auditoria e negociação. Vamos além da superfície para identificar e corrigir desperdícios ocultos em sua fatura, oportunidades que passam despercebidas pela maioria das empresas.
+                </p>
+                <p>
+                  Nossa equipe, composta por <strong className="text-white">especialistas com conhecimento profundo do mercado angolano</strong>, atua como uma extensão estratégica do seu negócio. Trabalhamos com empresas de todos os portes desde pequenos escritórios até grandes corporações com um compromisso inegociável: entregar resultados mensuráveis e economia garantida. 
+                </p>
+
+                <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                  <h4 className="font-semibold text-white mb-2">Missão</h4>
+                  <p>Fornecer soluções técnicas de excelência em telecomunicações, contribuindo para o desenvolvimento tecnológico de Angola.</p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Seção 2: O Que Fazemos */}
+        {/* Seção 2: O Que Fazemos COM IMAGEM À DIREITA */}
         <section id="o-que-fazemos" className="mb-16 scroll-mt-24">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">2. O Que Fazemos</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: Wifi, title: 'Planejamento e Otimização de Redes RF', desc: 'WiMAX, LTE, Wi-Fi, análises de cobertura, site survey' },
-              { icon: Cpu, title: 'Instalação e Montagem', desc: 'Infraestruturas de telecom, antenas, cabinets, racks, energia' },
-              { icon: Settings, title: 'Operação & Manutenção (O&M)', desc: 'Monitorização, drive tests, ajustes técnicos, limpeza preventiva' },
-              { icon: Globe, title: 'Redes Informáticas e IT', desc: 'VoIP, VPN, LAN/WAN estruturado, desenvolvimento de software' },
-              { icon: FileText, title: 'Inspeções Técnicas', desc: 'Auditorias, reengenharia, relatórios detalhados com evidências' },
-              { icon: Target, title: 'Consultoria Especializada', desc: 'Soluções customizadas para cada cliente e projeto' }
-            ].map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all group hover:shadow-lg"
-              >
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg w-fit mb-4 group-hover:scale-110 transition-transform">
-                  <service.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            <div className="lg:w-1/2">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">2. O Que Fazemos</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  { icon: Wifi, title: 'Planejamento e Otimização de Redes RF', desc: 'WiMAX, LTE, Wi-Fi, análises de cobertura, site survey' },
+                  { icon: Cpu, title: 'Instalação e Montagem', desc: 'Infraestruturas de telecom, antenas, cabinets, racks, energia' },
+                  { icon: Settings, title: 'Operação & Manutenção (O&M)', desc: 'Monitorização, drive tests, ajustes técnicos, limpeza preventiva' },
+                  { icon: Globe, title: 'Redes Informáticas e IT', desc: 'VoIP, VPN, LAN/WAN estruturado, desenvolvimento de software' }
+                ].map((service, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all group hover:shadow-lg"
+                  >
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg w-fit mb-4 group-hover:scale-110 transition-transform">
+                      <service.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
+                      {service.title}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {service.desc}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Imagem à direita */}
+            <div className="lg:w-1/2">
+              <div className="relative rounded-2xl overflow-hidden h-64 lg:h-96">
+                <img 
+                  src={sectionImages.planeamento}
+                  alt="Planeamento de redes"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-6">
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold">Expertise Técnica</h3>
+                    <p className="text-white/80">Análise e otimização de redes com tecnologia de ponta</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400">
-                  {service.desc}
-                </p>
-              </motion.div>
-            ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -213,66 +265,93 @@ const AboutComplete = () => {
           </div>
         </section>
 
-        {/* Seção 4: Planeamento & Otimização RF */}
+        {/* Seção 4: Planeamento & Otimização RF COM IMAGEM */}
         <section id="planeamento" className="mb-16 scroll-mt-24">
-          <div className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Wifi className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            {/* Imagem à esquerda */}
+            <div className="lg:w-1/2">
+              <div className="relative rounded-2xl overflow-hidden h-64 lg:h-80">
+                <img 
+                  src={sectionImages.planeamento}
+                  alt="Planeamento RF"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/30 to-transparent"></div>
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">4. Planeamento & Otimização RF</h2>
             </div>
             
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                'Planeamento de redes (WIMAX, LTE, Wi-Fi)',
-                'Site Survey e análises de cobertura',
-                'Planeamento e Otimização de Redes Rádio',
-                'Planeamento de transmissão',
-                'Reengenharia de parâmetros e KPIs',
-                'Relatórios técnicos de desempenho'
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <div className="w-6 h-6 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
-                    <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-                  </div>
-                  <span className="text-slate-700 dark:text-slate-300">{item}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="lg:w-1/2">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <Wifi className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">4. Planeamento & Otimização RF</h2>
+              </div>
+              
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  'Planeamento de redes (WIMAX, LTE, Wi-Fi)',
+                  'Site Survey e análises de cobertura',
+                  'Planeamento e Otimização de Redes Rádio',
+                  'Planeamento de transmissão',
+                  'Reengenharia de parâmetros e KPIs',
+                  'Relatórios técnicos de desempenho'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div className="w-6 h-6 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
+                      <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                    </div>
+                    <span className="text-slate-700 dark:text-slate-300">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
-        {/* Seção 5: Instalação & Montagem */}
+        {/* Seção 5: Instalação & Montagem COM IMAGEM */}
         <section id="instalacao" className="mb-16 scroll-mt-24">
-          <div className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 rounded-2xl p-8 border border-blue-100 dark:border-blue-800/30">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Cpu className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">5. Instalação & Montagem</h2>
+          <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            {/* Imagem de fundo */}
+            <div className="absolute inset-0">
+              <img 
+                src={sectionImages.instalacao}
+                alt="Instalação técnica"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-blue-900/70"></div>
             </div>
             
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                'Instalação de antenas e equipamentos RF',
-                'Montagem de cabinets, racks e energia',
-                'Organização e esteiramento de cabos',
-                'Instalação de suportes estruturais',
-                'Configuração e ativação de equipamentos'
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <div className="w-6 h-6 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
-                    <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+            <div className="relative z-10 p-8 md:p-12">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                  <Cpu className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-white">5. Instalação & Montagem</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  'Instalação de antenas e equipamentos RF',
+                  'Montagem de cabinets, racks e energia',
+                  'Organização e esteiramento de cabos',
+                  'Instalação de suportes estruturais',
+                  'Configuração e ativação de equipamentos',
+                  'Testes e validação técnica'
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div className="w-5 h-5 flex-shrink-0 bg-blue-500 rounded-full flex items-center justify-center mt-1">
+                      <CheckCircle className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-white/90">{item}</span>
                   </div>
-                  <span className="text-slate-700 dark:text-slate-300">{item}</span>
-                </li>
-              ))}
-            </ul>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Seção 6: Operação & Manutenção RF (O&M) - NOVA SEÇÃO */}
+        {/* Seção 6: Operação & Manutenção RF */}
         <section id="operacao-manutencao" className="mb-16 scroll-mt-24">
           <div className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-4 mb-6">
@@ -332,176 +411,216 @@ const AboutComplete = () => {
           </div>
         </section>
 
-        {/* Seção 7: Serviços de Redes IT e Software - NOVA SEÇÃO */}
+        {/* Seção 7: Serviços de Redes IT e Software COM IMAGEM */}
         <section id="redes-it-software" className="mb-16 scroll-mt-24">
-          <div className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 rounded-2xl p-8 border border-blue-100 dark:border-blue-800/30">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">7. Serviços de Redes IT e Software</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Monitor className="w-5 h-5 text-blue-600" />
-                  Redes e Infraestrutura
-                </h3>
-                <ul className="space-y-3">
-                  {[
-                    'Redes locais e remotas (LAN/WAN)',
-                    'Estruturação de redes cabladas',
-                    'VoIP e soluções de telefonia IP',
-                    'VPN para acesso remoto seguro',
-                    'Certificação e organização de racks'
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <div className="w-5 h-5 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
-                        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-                      </div>
-                      <span className="text-slate-700 dark:text-slate-300">{item}</span>
-                    </li>
-                  ))}
-                </ul>
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            <div className="lg:w-1/2">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">7. Serviços de Redes IT e Software</h2>
               </div>
               
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Database className="w-5 h-5 text-blue-600" />
-                  Desenvolvimento de Software
-                </h3>
-                <ul className="space-y-3">
-                  {[
-                    'Sistemas de gestão para telecomunicações',
-                    'Aplicações web e móveis',
-                    'Integração de sistemas',
-                    'Bancos de dados e armazenamento',
-                    'Soluções customizadas por encomenda'
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <div className="w-5 h-5 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
-                        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-                      </div>
-                      <span className="text-slate-700 dark:text-slate-300">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Seção 8: Metodologia de Trabalho - NOVA SEÇÃO */}
-        <section id="metodologia-trabalho" className="mb-16 scroll-mt-24">
-          <div className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Workflow className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">8. Metodologia de Trabalho</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                {
-                  step: '1',
-                  title: 'Planeamento',
-                  description: 'Análise detalhada dos requisitos e definição da estratégia',
-                  color: 'from-blue-500 to-blue-600'
-                },
-                {
-                  step: '2',
-                  title: 'Execução Técnica',
-                  description: 'Implementação conforme padrões internacionais',
-                  color: 'from-green-500 to-green-600'
-                },
-                {
-                  step: '3',
-                  title: 'Documentação',
-                  description: 'Registro completo com relatórios e evidências',
-                  color: 'from-purple-500 to-purple-600'
-                },
-                {
-                  step: '4',
-                  title: 'Validação Final',
-                  description: 'Testes rigorosos e garantia de qualidade',
-                  color: 'from-orange-500 to-orange-600'
-                }
-              ].map((item, index) => (
-                <div key={index} className="relative">
-                  <div className={`bg-gradient-to-r ${item.color} text-white rounded-xl p-6 h-full`}>
-                    <div className="text-3xl font-bold mb-3 opacity-90">{item.step}</div>
-                    <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                    <p className="text-white/90">{item.description}</p>
-                  </div>
-                  {index < 3 && (
-                    <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2">
-                      <div className="w-8 h-1 bg-slate-300 dark:bg-slate-600"></div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
-              <h4 className="font-semibold text-slate-900 dark:text-white mb-3">Suporte Pós-Instalação</h4>
-              <p className="text-slate-700 dark:text-slate-300">
-                Oferecemos suporte contínuo após a implementação, garantindo que todas as soluções continuem a operar com máxima eficiência.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Seção 9: Áreas de Atuação - NOVA SEÇÃO */}
-        <section id="areas-atuacao" className="mb-16 scroll-mt-24">
-          <div className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-800 rounded-2xl p-8 border border-blue-100 dark:border-blue-800/30">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Building className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">9. Áreas de Atuação</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                {
-                  sector: 'Operadoras de Telecomunicações',
-                  description: 'Parceria técnica com as principais operadoras do mercado angolano',
-                  clients: ['Unitel', 'Movicel', 'Africell', 'Angola Telecom']
-                },
-                {
-                  sector: 'Empresas de Infraestruturas',
-                  description: 'Fornecimento de soluções técnicas para construção e manutenção de infraestruturas',
-                  clients: ['Construtoras', 'Empresas de energia', 'Provedores de internet']
-                },
-                {
-                  sector: 'Integradores Técnicos',
-                  description: 'Suporte especializado para empresas de integração de sistemas',
-                  clients: ['Distribuidores', 'Instaladores', 'Consultorias técnicas']
-                },
-                {
-                  sector: 'Empresas com Conectividade',
-                  description: 'Soluções de conectividade interna para grandes organizações',
-                  clients: ['Bancos', 'Hospitais', 'Universidades', 'Empresas industriais']
-                }
-              ].map((area, index) => (
-                <div key={index} className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all">
-                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-                    {area.sector}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Monitor className="w-5 h-5 text-blue-600" />
+                    Redes e Infraestrutura
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400 mb-4">
-                    {area.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {area.clients.map((client, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-full">
-                        {client}
-                      </span>
+                  <ul className="space-y-3">
+                    {[
+                      'Redes locais e remotas (LAN/WAN)',
+                      'Estruturação de redes cabladas',
+                      'VoIP e soluções de telefonia IP',
+                      'VPN para acesso remoto seguro'
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="w-5 h-5 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
+                          <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                        </div>
+                        <span className="text-slate-700 dark:text-slate-300">{item}</span>
+                      </li>
                     ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Database className="w-5 h-5 text-blue-600" />
+                    Desenvolvimento de Software
+                  </h3>
+                  <ul className="space-y-3">
+                    {[
+                      'Sistemas de gestão para telecomunicações',
+                      'Aplicações web e móveis',
+                      'Integração de sistemas',
+                      'Bancos de dados e armazenamento'
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="w-5 h-5 flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mt-1">
+                          <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                        </div>
+                        <span className="text-slate-700 dark:text-slate-300">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            {/* Imagem à direita */}
+            <div className="lg:w-1/2">
+              <div className="relative rounded-2xl overflow-hidden h-64 lg:h-80">
+                <img 
+                  src={sectionImages.redesIt}
+                  alt="Data center e servidores"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent flex items-end p-6">
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold">Infraestrutura Tecnológica</h3>
+                    <p className="text-white/80">Soluções completas em TI e desenvolvimento</p>
                   </div>
                 </div>
-              ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção 8: Metodologia de Trabalho COM IMAGEM */}
+        <section id="metodologia-trabalho" className="mb-16 scroll-mt-24">
+          <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            {/* Imagem de fundo */}
+            <div className="absolute inset-0">
+              <img 
+                src={sectionImages.metodologia}
+                alt="Metodologia de trabalho"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 to-slate-900/60"></div>
+            </div>
+            
+            <div className="relative z-10 p-8 md:p-12">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                  <Workflow className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-white">8. Metodologia de Trabalho</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  {
+                    step: '1',
+                    title: 'Planeamento',
+                    description: 'Análise detalhada dos requisitos e definição da estratégia',
+                    color: 'from-blue-500 to-blue-600'
+                  },
+                  {
+                    step: '2',
+                    title: 'Execução Técnica',
+                    description: 'Implementação conforme padrões internacionais',
+                    color: 'from-green-500 to-green-600'
+                  },
+                  {
+                    step: '3',
+                    title: 'Documentação',
+                    description: 'Registro completo com relatórios e evidências',
+                    color: 'from-purple-500 to-purple-600'
+                  },
+                  {
+                    step: '4',
+                    title: 'Validação Final',
+                    description: 'Testes rigorosos e garantia de qualidade',
+                    color: 'from-orange-500 to-orange-600'
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="relative">
+                    <div className={`bg-gradient-to-r ${item.color} text-white rounded-xl p-6 h-full backdrop-blur-sm bg-white/10 border border-white/20`}>
+                      <div className="text-3xl font-bold mb-3 opacity-90">{item.step}</div>
+                      <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                      <p className="text-white/90">{item.description}</p>
+                    </div>
+                    {index < 3 && (
+                      <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2">
+                        <div className="w-8 h-1 bg-white/30"></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção 9: Áreas de Atuação COM IMAGEM */}
+        <section id="areas-atuacao" className="mb-16 scroll-mt-24">
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            {/* Imagem à esquerda */}
+            <div className="lg:w-1/2">
+              <div className="relative rounded-2xl overflow-hidden h-64 lg:h-80">
+                <img 
+                  src={sectionImages.areasAtuacao}
+                  alt="Áreas de atuação"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/30 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent">
+                  <h3 className="text-xl font-bold text-white">Atuação Nacional</h3>
+                  <p className="text-white/80">Cobertura em todo território angolano</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="lg:w-1/2">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <Building className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">9. Áreas de Atuação</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    sector: 'Operadoras de Telecomunicações',
+                    description: 'Parceria técnica com as principais operadoras do mercado angolano',
+                    clients: ['Angola Telecom']
+                  },
+                  {
+                    sector: 'Empresas de Infraestruturas',
+                    description: 'Fornecimento de soluções técnicas para construção e manutenção de infraestruturas',
+                    clients: ['Construtoras',  'Provedores de internet']
+                  },
+                  {
+                    sector: 'Integradores Técnicos',
+                    description: 'Suporte especializado para empresas de integração de sistemas',
+                    clients: ['Consultorias técnicas']
+                  },
+                  {
+                    sector: 'Empresas com Conectividade',
+                    description: 'Soluções de conectividade interna para grandes organizações',
+                    clients: ['Bancos', 'Hospitais', 'Universidades', 'Empresas industriais']
+                  }
+                ].map((area, index) => (
+                  <div key={index} className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all">
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
+                      {area.sector}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400 mb-4">
+                      {area.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {area.clients.map((client, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-full">
+                          {client}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -571,60 +690,54 @@ const AboutComplete = () => {
           </div>
         </section>
 
-        {/* Contacto Final */}
+        {/* Contacto Final - CENTRALIZADO */}
         <section id="contactos-final" className="mt-20 mb-10 scroll-mt-24">
-          <div className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-slate-950 rounded-2xl p-10 text-center text-white">
-            <h2 className="text-3xl font-bold mb-4">11. Contactos</h2>
-            <p className="text-xl mb-8 text-slate-300">
+          <div className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-slate-950 rounded-2xl p-10 text-white">
+            <h2 className="text-3xl font-bold mb-8 text-center">11. Contactos</h2>
+            <p className="text-xl mb-10 text-slate-300 text-center">
               Entre em contacto para uma consultoria personalizada
             </p>
             
-            <div className="space-y-6 max-w-md mx-auto">
-              <div className="flex items-center justify-center gap-4">
-                <div className="p-3 bg-white/10 rounded-xl">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {/* Telefone - Centralizado */}
+              <div className="flex flex-col items-center text-center p-6 bg-white/5 rounded-xl border border-white/10 hover:border-blue-500 transition-all group">
+                <div className="p-4 bg-blue-600/20 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                  <Phone className="w-8 h-8 text-blue-400" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm text-slate-400">Telefone</p>
-                  <p className="text-xl font-bold">+244 922 965 959</p>
-                </div>
+                <h3 className="text-lg font-bold mb-2">Telefone</h3>
+                <p className="text-2xl font-bold text-white">+244 922 965 959</p>
+                <p className="text-slate-400 text-sm mt-2">Disponível 24/7 para emergências</p>
               </div>
               
-              <div className="flex items-center justify-center gap-4">
-                <div className="p-3 bg-white/10 rounded-xl">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+              {/* Email - Centralizado */}
+              <div className="flex flex-col items-center text-center p-6 bg-white/5 rounded-xl border border-white/10 hover:border-blue-500 transition-all group">
+                <div className="p-4 bg-blue-600/20 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                  <Mail className="w-8 h-8 text-blue-400" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm text-slate-400">Email</p>
-                  <p className="text-xl font-bold">geral@milvendas.ao</p>
-                </div>
+                <h3 className="text-lg font-bold mb-2">Email</h3>
+                <p className="text-2xl font-bold text-white">geral@milvendas.ao</p>
+                <p className="text-slate-400 text-sm mt-2">Resposta em até 24h úteis</p>
               </div>
               
-              <div className="flex items-center justify-center gap-4">
-                <div className="p-3 bg-white/10 rounded-xl">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+              {/* Endereço - Centralizado */}
+              <div className="flex flex-col items-center text-center p-6 bg-white/5 rounded-xl border border-white/10 hover:border-blue-500 transition-all group">
+                <div className="p-4 bg-blue-600/20 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                  <Map className="w-8 h-8 text-blue-400" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm text-slate-400">Endereço</p>
-                  <p className="text-xl font-bold">Rua 120 – Urbanização Nova Vida</p>
-                </div>
+                <h3 className="text-lg font-bold mb-2">Endereço</h3>
+                <p className="text-xl font-bold text-white">Rua 120</p>
+                <p className="text-slate-300">Urbanização Nova Vida</p>
+                <p className="text-slate-400 text-sm mt-2">Luanda, Angola</p>
               </div>
             </div>
             
-            <div className="mt-10">
+            <div className="mt-12 text-center">
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 px-8 py-3 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl transition-all hover:scale-105"
+                className="inline-flex items-center gap-3 px-10 py-4 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl transition-all hover:scale-105 shadow-lg"
               >
-                <ArrowLeft size={20} />
-                Voltar para o Site Principal
+                <ArrowLeft size={22} />
+                <span className="text-lg">Voltar para o Site Principal</span>
               </Link>
             </div>
           </div>

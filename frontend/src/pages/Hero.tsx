@@ -1,4 +1,4 @@
-import React from 'react';
+//import React from 'react';
 import { motion } from 'framer-motion';
 import logoMv from '../assets/logo-mv.svg';
 import { useSettings } from '../hooks/useSettings';

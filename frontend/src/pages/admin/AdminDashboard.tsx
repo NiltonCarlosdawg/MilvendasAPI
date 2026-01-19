@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Trash2, Upload, LogOut, PlusCircle, Loader2, 
-  Calendar, Briefcase, ChevronRight, CheckCircle2, AlertCircle 
+  Calendar, Briefcase, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
     }
   };
 
-    function deleteItem(id: any): void {
+    function deleteItem(_id: any): void {
         throw new Error('Function not implemented.');
     }
 

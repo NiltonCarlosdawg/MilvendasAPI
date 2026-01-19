@@ -1,5 +1,5 @@
 // src/pages/Portfolio.tsx - VERSÃO SINCRONIZADA COM ADMIN
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code, Smartphone, Globe, Eye, Loader2, X, ExternalLink, Calendar, Tag, Layers } from 'lucide-react';
 
@@ -19,7 +19,7 @@ const Portfolio = () => {
   const [selectedProject, setSelectedProject] = useState<PortfolioItemType | null>(null);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItemType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   // Lógica de URLs idêntica ao PortifolioPreview.tsx (Admin)
   const API_URL = 'https://milvendasapi.onrender.com/api/v1/portfolio';
@@ -84,23 +84,23 @@ const Portfolio = () => {
         </motion.div>
 
         {/* Filtros */}
-        {categories.length > 1 && (
-          <div className="flex flex-wrap justify-center gap-3 mb-16">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setActiveFilter(category)}
-                className={`px-8 py-3 rounded-2xl font-bold transition-all ${
-                  activeFilter === category 
-                  ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30 scale-105' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
-                }`}
-              >
-                {category === 'all' ? 'Todos' : category}
-              </button>
-            ))}
-          </div>
-        )}
+{categories.length > 1 && (
+  <div className="flex flex-wrap justify-center gap-3 mb-16">
+    {categories.map(category => (
+      <button
+        key={category}
+        onClick={() => setActiveFilter(category)}
+        className={`px-8 py-3 rounded-2xl font-bold transition-all ${
+          activeFilter === category 
+          ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30 scale-105' 
+          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+        }`}
+      >
+        {category === 'all' ? 'Todos' : category}
+      </button>
+    ))}
+  </div>
+)}
 
         {/* Grid de Projetos */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">

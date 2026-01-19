@@ -1,7 +1,7 @@
 // src/components/Footer.tsx - ATUALIZADO com Integração de API
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Facebook, Instagram, Linkedin, Twitter, Lock, Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import {  Instagram, Linkedin, Mail, Loader2, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -44,20 +44,20 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-slate-950 pt-20 pb-10 border-t border-white/5">
+    <footer className="bg-white dark:bg-slate-950 pt-20 pb-10 border-t border-slate-200 dark:border-white/5 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-2xl font-bold text-white mb-6 tracking-tighter italic">MIL VENDAS</h3>
             <p className="text-gray-500 max-w-sm mb-8">
-              Líderes em soluções tecnológicas em Luanda. Conectamos marcas a pessoas através do código e do design.
+              Construindo o futuro das soluções tecnológicas em Luanda. Conectamos marcas a pessoas através do código e do design.
             </p>
             <div className="flex gap-4">
               {[
-                { Icon: Facebook, link: "#" },
+                
                 { Icon: Instagram, link: "#" },
-                { Icon: Linkedin, link: "#" },
-                { Icon: Twitter, link: "#" }
+                { Icon: Linkedin, link: "#" }
+                
               ].map(({ Icon, link }, i) => (
                 <motion.a
                   key={i}
@@ -129,7 +129,7 @@ const Footer = () => {
         </div>
         
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 text-gray-600 text-[10px] uppercase tracking-widest font-bold">
-          <p>© {new Date().getFullYear()} Mil Vendas Digital. Luanda, Angola.</p>
+          <p>© {new Date().getFullYear()} Mil Vendas Prestação de serviços. Luanda, Angola.</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition-colors">Termos</a>
             <a href="#" className="hover:text-white transition-colors">Privacidade</a>

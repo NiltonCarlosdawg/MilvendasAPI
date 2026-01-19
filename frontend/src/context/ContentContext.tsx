@@ -45,7 +45,7 @@ const defaultContent: Record<string, string> = {
   
   // About
   'about_title': 'Compromisso com a Excelência',
-  'about_description': 'A Mil Vendas não é apenas uma agência, é o seu braço direito tecnológico em Luanda.',
+  'about_description': 'A Mil Vendas não é apenas uma empresa, é o seu braço direito tecnológico em Luanda.',
   'about_feature_1': 'Desenvolvimento Nativo',
   'about_feature_2': 'Cloud Computing',
   'about_feature_3': 'Segurança de Dados',
