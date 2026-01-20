@@ -2,32 +2,57 @@
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
-import paths from '../config/paths.js';  // caminho absoluto unificado
+import paths from '../config/paths.js';
 
 const prisma = new PrismaClient();
 const EVENTS_UPLOAD_PATH = paths.EVENTS_UPLOAD;
 
 // ========================================
-// LISTAR TODOS OS EVENTOS (público)
-// ========================================
+// LISTAR TODOS OS EVENTOS (público) - COM PAGINAÇÃO PARA REACT ADMIN
 export const getEvents = async (req, res) => {
   try {
+    // 1. Conta o TOTAL de eventos publicados (essencial!)
+    const total = await prisma.event.count({
+      where: { status: 'PUBLISHED' },
+    });
+
+    // 2. Parseia o Range enviado pelo React Admin (ex: Range: items=0-9)
+    const rangeHeader = req.get('Range') || 'items=0-9';
+    const match = rangeHeader.match(/items=(\d+)-(\d+)/);
+
+    let skip = 0;
+    let take = 10; // valor default
+
+    if (match) {
+      skip = parseInt(match[1], 10);
+      take = parseInt(match[2], 10) - skip + 1;
+    }
+
+    // 3. Busca paginada
     const events = await prisma.event.findMany({
-      where: { status: 'PUBLISHED' }, // só eventos publicados
+      where: { status: 'PUBLISHED' },
       orderBy: { eventDate: 'asc' },
+      skip,
+      take,
       include: {
         media: {
           where: { isCover: true },
           take: 1,
-          select: { url: true }
+          select: { url: true }  // ajuste para 'mediaUrl' se for o nome real do campo no schema
         }
       }
     });
 
+    // 4. Define o total para o middleware gerar o Content-Range
+    res.locals.total = total;
+
     res.json(events);
   } catch (error) {
-    console.error('Erro ao listar eventos:', error);
-    res.status(500).json({ error: 'Erro ao buscar eventos' });
+    console.error('ERRO COMPLETO NO getEvents:', error);
+    res.status(500).json({ 
+      error: 'Erro interno ao listar eventos',
+      details: error.message 
+    });
   }
 };
 
@@ -147,7 +172,6 @@ export const uploadEventMedia = async (req, res) => {
       return res.status(400).json({ error: "Nenhum arquivo enviado" });
     }
 
-    // Validação: tipo de arquivo deve combinar com mediaType
     files.forEach(file => {
       const isImage = file.mimetype.startsWith('image/');
       const isVideo = file.mimetype.startsWith('video/');
@@ -167,7 +191,7 @@ export const uploadEventMedia = async (req, res) => {
       return prisma.eventMedia.create({
         data: {
           eventId,
-          url: file.filename,
+          url: file.filename,  // ou mediaUrl se for o nome do campo no schema
           type: mediaType,
           title: title || file.originalname,
           isCover: isCover === 'true' || isCover === true
@@ -250,6 +274,9 @@ export const getTicketRequests = async (req, res) => {
     const where = { eventId };
     if (status) where.status = status;
 
+    // Total para paginação futura (se precisar)
+    const total = await prisma.eventTicketRequest.count({ where });
+
     const requests = await prisma.eventTicketRequest.findMany({
       where,
       include: {
@@ -260,6 +287,7 @@ export const getTicketRequests = async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
+    res.locals.total = total;  // Para middleware de Content-Range
     res.json(requests);
   } catch (error) {
     console.error('Erro ao listar solicitações:', error);
@@ -302,7 +330,6 @@ export const updateEvent = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
 
-    // Não permitir atualizar slug diretamente
     if (data.slug) delete data.slug;
 
     if (data.eventDate) data.eventDate = new Date(data.eventDate);
@@ -327,7 +354,6 @@ export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Deletar mídias associadas (físicas e banco)
     const medias = await prisma.eventMedia.findMany({
       where: { eventId: id }
     });

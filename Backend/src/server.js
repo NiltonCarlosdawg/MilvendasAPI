@@ -17,7 +17,10 @@ import newsletterRoutes from './routes/newsletter.routes.js';
 import userRoutes from './routes/user.routes.js';
 import eventRoutes from './routes/events.routes.js';
 
-// Config de caminhos absolutos (nova)
+// Middleware de paginação (para Content-Range do React Admin)
+import { addPaginationHeaders } from './middlewares/paginationHeader.js';
+
+// Config de caminhos absolutos
 import paths from './config/paths.js';
 
 // Config ES Modules
@@ -31,7 +34,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ========================================
-// CRIAR PASTAS DE UPLOAD NO BOOT (correção crítica)
+// CRIAR PASTAS DE UPLOAD NO BOOT
 // ========================================
 const uploadDirs = [paths.UPLOAD_ROOT, paths.EVENTS_UPLOAD];
 uploadDirs.forEach(dir => {
@@ -42,21 +45,20 @@ uploadDirs.forEach(dir => {
 });
 
 // ========================================
-// CORS (mantido exatamente como estava)
+// CORS – TOTALMENTE COMPATÍVEL COM REACT ADMIN
 // ========================================
 const corsOptions = {
-  origin: function (origin, callback) {
-    const allowedOrigins = [
+  origin: (origin, callback) => {
+    const allowed = [
       'http://localhost:3000',
-      'http://localhost:5173',
+      'http://localhost:5173',      // Vite/React Admin
       'http://localhost:4200',
       'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
       process.env.FRONTEND_URL,
     ].filter(Boolean);
 
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowed.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Origem não permitida pelo CORS'));
@@ -65,19 +67,34 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Authorization'],
-  maxAge: 86400
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Range',               // Obrigatório para React Admin
+    'Content-Range',
+  ],
+  exposedHeaders: [
+    'Authorization',
+    'Content-Range',       // React Admin lê isso para total
+    'X-Total-Count',       // Compatibilidade extra
+  ],
+  maxAge: 86400,
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware para adicionar Content-Range automaticamente
+app.use(addPaginationHeaders);
+console.log('✅ Middleware de paginação (Content-Range) carregado');
+
 // ========================================
-// SERVIR UPLOADS (antes das rotas API - correção de ordem)
+// SERVIR UPLOADS (antes das rotas API)
 // ========================================
-app.use('/uploads', express.static(paths.UPLOAD_ROOT));  // usando caminho absoluto
+app.use('/uploads', express.static(paths.UPLOAD_ROOT));
 
 // ========================================
 // ROTAS
@@ -90,7 +107,7 @@ app.use('/api/v1/newsletter', newsletterRoutes);
 app.use('/api/v1/events', eventRoutes);
 
 // ========================================
-// SWAGGER (mantido)
+// SWAGGER
 // ========================================
 const swaggerOptions = {
   definition: {
@@ -102,17 +119,17 @@ const swaggerOptions = {
     },
     servers: [
       { url: `http://localhost:${PORT}` },
-      { url: process.env.FRONTEND_URL }
+      { url: process.env.FRONTEND_URL || 'https://seu-dominio.com' }
     ],
   },
-  apis: ['./src/routes/*.js', './src/controllers/*.js'],  // ajuste se precisar
+  apis: ['./src/routes/*.js', './src/controllers/*.js'],
 };
 
 const specs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // ========================================
-// HEALTH + 404 (mantido)
+// HEALTH + 404
 // ========================================
 app.get('/', (req, res) => {
   res.json({ message: 'API MilVendas rodando!' });
@@ -142,7 +159,7 @@ app.use((req, res) => {
 });
 
 // ========================================
-// VALIDAÇÃO DE ENV (melhorada, mas mantendo compatibilidade)
+// VALIDAÇÃO DE ENV
 // ========================================
 const validateEnv = () => {
   const required = ['DATABASE_URL', 'JWT_SECRET'];
@@ -175,13 +192,13 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔢 Porta: ${PORT}`);
   console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📄 Documentação: ${serverUrl}/api-docs`);
-  console.log(`🔒 CORS: Ativado`);
+  console.log(`🔒 CORS: Ativado (Range/Content-Range liberados)`);
   console.log(`📁 Uploads: ${paths.UPLOAD_ROOT}`);
   console.log(`📁 Events: ${paths.EVENTS_UPLOAD}`);
   console.log('========================================\n');
 });
 
-// Graceful shutdown + erros (mantido)
+// Graceful shutdown + erros
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
   process.exit(1);
