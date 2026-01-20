@@ -1,14 +1,68 @@
+// src/controllers/EventController.js
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import paths from '../config/paths.js';  // caminho absoluto unificado
 
 const prisma = new PrismaClient();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const EVENTS_UPLOAD_PATH = paths.EVENTS_UPLOAD;
 
 // ========================================
-// CRIAR EVENTO
+// LISTAR TODOS OS EVENTOS (público)
+// ========================================
+export const getEvents = async (req, res) => {
+  try {
+    const events = await prisma.event.findMany({
+      where: { status: 'PUBLISHED' }, // só eventos publicados
+      orderBy: { eventDate: 'asc' },
+      include: {
+        media: {
+          where: { isCover: true },
+          take: 1,
+          select: { url: true }
+        }
+      }
+    });
+
+    res.json(events);
+  } catch (error) {
+    console.error('Erro ao listar eventos:', error);
+    res.status(500).json({ error: 'Erro ao buscar eventos' });
+  }
+};
+
+// ========================================
+// BUSCAR EVENTO POR SLUG (público)
+// ========================================
+export const getEventBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const event = await prisma.event.findUnique({
+      where: { slug },
+      include: {
+        media: {
+          orderBy: { createdAt: 'asc' }
+        },
+        _count: {
+          select: { ticketRequests: true }
+        }
+      }
+    });
+
+    if (!event) {
+      return res.status(404).json({ error: 'Evento não encontrado' });
+    }
+
+    res.json(event);
+  } catch (error) {
+    console.error('Erro ao buscar evento por slug:', error);
+    res.status(500).json({ error: 'Erro ao buscar evento' });
+  }
+};
+
+// ========================================
+// CRIAR EVENTO (admin)
 // ========================================
 export const createEvent = async (req, res) => {
   try {
@@ -29,35 +83,30 @@ export const createEvent = async (req, res) => {
       status
     } = req.body;
 
-    // Validações
     if (!title || !eventType || !descriptionShort || !eventDate || !location) {
       return res.status(400).json({ 
         error: "Campos obrigatórios: title, eventType, descriptionShort, eventDate, location" 
       });
     }
 
-    // Gerar slug a partir do título
     const slug = title
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
 
-    // Verificar se slug já existe
     const existingEvent = await prisma.event.findUnique({ where: { slug } });
     if (existingEvent) {
       return res.status(400).json({ 
-        error: "Já existe um evento com esse título. Por favor, escolha outro." 
+        error: "Já existe um evento com esse título. Escolha outro título." 
       });
     }
 
-    // Determinar se permite solicitação de ingresso
-    const shouldAllowTicketRequest = eventType === 'OWN' ? 
-      (allowTicketRequest === true || allowTicketRequest === 'true') : 
-      false;
+    const shouldAllowTicketRequest = eventType === 'OWN' 
+      ? (allowTicketRequest === true || allowTicketRequest === 'true') 
+      : false;
 
-    // Criar evento
     const event = await prisma.event.create({
       data: {
         title,
@@ -81,286 +130,80 @@ export const createEvent = async (req, res) => {
     res.status(201).json(event);
   } catch (error) {
     console.error('Erro ao criar evento:', error);
-    res.status(500).json({ error: "Erro ao criar evento" });
+    res.status(500).json({ error: 'Erro interno ao criar evento' });
   }
 };
 
 // ========================================
-// UPLOAD DE MÍDIA (Imagens e Vídeos)
+// UPLOAD DE MÍDIA (admin)
 // ========================================
 export const uploadEventMedia = async (req, res) => {
   try {
     const { eventId } = req.params;
     const { mediaType, title, isCover } = req.body;
-    const files = req.files; // Múltiplos arquivos
+    const files = req.files;
 
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "Nenhum arquivo enviado" });
     }
 
-    // Verificar se o evento existe
-    const event = await prisma.event.findUnique({ where: { id: eventId } });
-    if (!event) {
-      return res.status(404).json({ error: "Evento não encontrado" });
-    }
+    // Validação: tipo de arquivo deve combinar com mediaType
+    files.forEach(file => {
+      const isImage = file.mimetype.startsWith('image/');
+      const isVideo = file.mimetype.startsWith('video/');
 
-    // Contar mídias existentes
-    const existingMedia = await prisma.eventMedia.findMany({
-      where: { eventId, mediaType: mediaType || 'image' }
+      if (mediaType === 'image' && !isImage) {
+        fs.unlinkSync(file.path);
+        throw new Error(`Arquivo ${file.originalname} não é imagem válida`);
+      }
+
+      if (mediaType === 'video' && !isVideo) {
+        fs.unlinkSync(file.path);
+        throw new Error(`Arquivo ${file.originalname} não é vídeo válido`);
+      }
     });
 
-    // Limites: 10 imagens + 1 vídeo
-    const imageCount = existingMedia.filter(m => m.mediaType === 'image').length;
-    const videoCount = existingMedia.filter(m => m.mediaType === 'video').length;
-
-    if (mediaType === 'image' && imageCount + files.length > 10) {
-      return res.status(400).json({ 
-        error: `Limite de 10 imagens atingido. Você já tem ${imageCount} imagens.` 
+    const mediaPromises = files.map(async (file) => {
+      return prisma.eventMedia.create({
+        data: {
+          eventId,
+          url: file.filename,
+          type: mediaType,
+          title: title || file.originalname,
+          isCover: isCover === 'true' || isCover === true
+        }
       });
-    }
-
-    if (mediaType === 'video' && videoCount + files.length > 1) {
-      return res.status(400).json({ 
-        error: "Apenas 1 vídeo é permitido por evento." 
-      });
-    }
-
-    // Se marcado como capa, remover capa anterior
-    if (isCover === 'true' || isCover === true) {
-      await prisma.eventMedia.updateMany({
-        where: { eventId, isCover: true },
-        data: { isCover: false }
-      });
-    }
-
-    // Criar registros de mídia
-    const mediaRecords = files.map((file, index) => ({
-      eventId,
-      mediaType: mediaType || 'image',
-      mediaUrl: file.filename,
-      title: title || `${mediaType || 'image'} ${index + 1}`,
-      order: existingMedia.length + index,
-      isCover: (isCover === 'true' || isCover === true) && index === 0
-    }));
-
-    const createdMedia = await prisma.eventMedia.createMany({
-      data: mediaRecords
     });
 
-    res.status(201).json({ 
-      message: `${files.length} arquivo(s) enviado(s) com sucesso`,
-      count: createdMedia.count
+    const uploadedMedia = await Promise.all(mediaPromises);
+
+    res.status(201).json({
+      message: `${files.length} mídia(s) enviada(s) com sucesso`,
+      media: uploadedMedia
     });
   } catch (error) {
     console.error('Erro ao fazer upload de mídia:', error);
-    res.status(500).json({ error: "Erro ao fazer upload de mídia" });
+    const status = error.message.includes('não é') ? 400 : 500;
+    res.status(status).json({ 
+      error: error.message || "Erro ao processar upload de mídia" 
+    });
   }
 };
 
 // ========================================
-// LISTAR EVENTOS (Público e Admin)
-// ========================================
-export const getEvents = async (req, res) => {
-  try {
-    const { status, eventType, upcoming } = req.query;
-    const isAdmin = req.userId; // Se tem userId, é admin autenticado
-
-    const where = {};
-
-    // Filtros públicos (não admin)
-    if (!isAdmin) {
-      where.status = 'PUBLISHED';
-    } else {
-      // Admin pode filtrar por status
-      if (status) where.status = status;
-    }
-
-    // Filtro por tipo
-    if (eventType) where.eventType = eventType;
-
-    // Filtro de eventos futuros
-    if (upcoming === 'true') {
-      where.eventDate = { gte: new Date() };
-    }
-
-    const events = await prisma.event.findMany({
-      where,
-      include: {
-        media: {
-          orderBy: { order: 'asc' },
-          take: 1, // Apenas a primeira mídia (capa)
-        },
-        _count: {
-          select: { ticketRequests: true }
-        }
-      },
-      orderBy: { eventDate: 'asc' }
-    });
-
-    res.json(events);
-  } catch (error) {
-    console.error('Erro ao listar eventos:', error);
-    res.status(500).json({ error: "Erro ao listar eventos" });
-  }
-};
-
-// ========================================
-// BUSCAR EVENTO POR SLUG
-// ========================================
-export const getEventBySlug = async (req, res) => {
-  try {
-    const { slug } = req.params;
-
-    const event = await prisma.event.findUnique({
-      where: { slug },
-      include: {
-        media: {
-          orderBy: { order: 'asc' }
-        }
-      }
-    });
-
-    if (!event) {
-      return res.status(404).json({ error: "Evento não encontrado" });
-    }
-
-    // Incrementar visualizações
-    await prisma.event.update({
-      where: { id: event.id },
-      data: { viewCount: { increment: 1 } }
-    });
-
-    res.json(event);
-  } catch (error) {
-    console.error('Erro ao buscar evento:', error);
-    res.status(500).json({ error: "Erro ao buscar evento" });
-  }
-};
-
-// ========================================
-// ATUALIZAR EVENTO
-// ========================================
-export const updateEvent = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = { ...req.body };
-
-    // Se o título mudou, atualizar slug
-    if (updateData.title) {
-      updateData.slug = updateData.title
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-    }
-
-    // Converter datas se necessário
-    if (updateData.eventDate) {
-      updateData.eventDate = new Date(updateData.eventDate);
-    }
-    if (updateData.eventEndDate) {
-      updateData.eventEndDate = new Date(updateData.eventEndDate);
-    }
-
-    const event = await prisma.event.update({
-      where: { id },
-      data: updateData,
-      include: { media: true }
-    });
-
-    res.json(event);
-  } catch (error) {
-    console.error('Erro ao atualizar evento:', error);
-    const status = error.code === 'P2025' ? 404 : 500;
-    res.status(status).json({ error: "Erro ao atualizar evento" });
-  }
-};
-
-// ========================================
-// DELETAR EVENTO
-// ========================================
-export const deleteEvent = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Buscar mídias para deletar arquivos físicos
-    const event = await prisma.event.findUnique({
-      where: { id },
-      include: { media: true }
-    });
-
-    if (!event) {
-      return res.status(404).json({ error: "Evento não encontrado" });
-    }
-
-    // Deletar arquivos físicos
-    const uploadPath = path.join(__dirname, '../../uploads/events');
-    event.media.forEach(media => {
-      const filePath = path.join(uploadPath, media.mediaUrl);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    });
-
-    // Deletar evento (cascade deleta mídias e solicitações)
-    await prisma.event.delete({ where: { id } });
-
-    res.json({ message: "Evento removido com sucesso" });
-  } catch (error) {
-    console.error('Erro ao deletar evento:', error);
-    res.status(500).json({ error: "Erro ao deletar evento" });
-  }
-};
-
-// ========================================
-// DELETAR MÍDIA ESPECÍFICA
-// ========================================
-export const deleteEventMedia = async (req, res) => {
-  try {
-    const { mediaId } = req.params;
-
-    const media = await prisma.eventMedia.findUnique({
-      where: { id: mediaId }
-    });
-
-    if (!media) {
-      return res.status(404).json({ error: "Mídia não encontrada" });
-    }
-
-    // Deletar arquivo físico
-    const uploadPath = path.join(__dirname, '../../uploads/events');
-    const filePath = path.join(uploadPath, media.mediaUrl);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    // Deletar registro
-    await prisma.eventMedia.delete({ where: { id: mediaId } });
-
-    res.json({ message: "Mídia removida com sucesso" });
-  } catch (error) {
-    console.error('Erro ao deletar mídia:', error);
-    res.status(500).json({ error: "Erro ao deletar mídia" });
-  }
-};
-
-// ========================================
-// SOLICITAR INGRESSO (Público)
+// SOLICITAR INGRESSO (público)
 // ========================================
 export const requestTicket = async (req, res) => {
   try {
     const { eventId } = req.params;
     const { name, email, phone, quantity, message } = req.body;
 
-    // Validações
     if (!name || !email || !phone) {
       return res.status(400).json({ 
         error: "Nome, email e telefone são obrigatórios" 
       });
     }
 
-    // Verificar se o evento existe e permite solicitação
     const event = await prisma.event.findUnique({
       where: { id: eventId }
     });
@@ -375,14 +218,13 @@ export const requestTicket = async (req, res) => {
       });
     }
 
-    // Criar solicitação
     const ticketRequest = await prisma.eventTicketRequest.create({
       data: {
         eventId,
         name,
         email,
         phone,
-        quantity: quantity || 1,
+        quantity: quantity ? parseInt(quantity) : 1,
         message
       }
     });
@@ -398,7 +240,7 @@ export const requestTicket = async (req, res) => {
 };
 
 // ========================================
-// LISTAR SOLICITAÇÕES DE INGRESSO (Admin)
+// LISTAR SOLICITAÇÕES DE INGRESSO (admin)
 // ========================================
 export const getTicketRequests = async (req, res) => {
   try {
@@ -426,7 +268,7 @@ export const getTicketRequests = async (req, res) => {
 };
 
 // ========================================
-// ATUALIZAR STATUS DA SOLICITAÇÃO (Admin)
+// ATUALIZAR STATUS DA SOLICITAÇÃO (admin)
 // ========================================
 export const updateTicketRequestStatus = async (req, res) => {
   try {
@@ -449,5 +291,92 @@ export const updateTicketRequestStatus = async (req, res) => {
   } catch (error) {
     console.error('Erro ao atualizar status:', error);
     res.status(500).json({ error: "Erro ao atualizar status" });
+  }
+};
+
+// ========================================
+// ATUALIZAR EVENTO (admin)
+// ========================================
+export const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    // Não permitir atualizar slug diretamente
+    if (data.slug) delete data.slug;
+
+    if (data.eventDate) data.eventDate = new Date(data.eventDate);
+    if (data.eventEndDate) data.eventEndDate = new Date(data.eventEndDate);
+
+    const updatedEvent = await prisma.event.update({
+      where: { id },
+      data
+    });
+
+    res.json(updatedEvent);
+  } catch (error) {
+    console.error('Erro ao atualizar evento:', error);
+    res.status(500).json({ error: 'Erro ao atualizar evento' });
+  }
+};
+
+// ========================================
+// DELETAR EVENTO (admin)
+// ========================================
+export const deleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Deletar mídias associadas (físicas e banco)
+    const medias = await prisma.eventMedia.findMany({
+      where: { eventId: id }
+    });
+
+    medias.forEach(media => {
+      const filePath = path.join(EVENTS_UPLOAD_PATH, media.url);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+
+    await prisma.eventMedia.deleteMany({ where: { eventId: id } });
+    await prisma.eventTicketRequest.deleteMany({ where: { eventId: id } });
+    await prisma.event.delete({ where: { id } });
+
+    res.json({ message: "Evento deletado com sucesso" });
+  } catch (error) {
+    console.error('Erro ao deletar evento:', error);
+    res.status(500).json({ error: 'Erro ao deletar evento' });
+  }
+};
+
+// ========================================
+// DELETAR MÍDIA ESPECÍFICA (admin)
+// ========================================
+export const deleteEventMedia = async (req, res) => {
+  try {
+    const { mediaId } = req.params;
+
+    const media = await prisma.eventMedia.findUnique({
+      where: { id: mediaId }
+    });
+
+    if (!media) {
+      return res.status(404).json({ error: "Mídia não encontrada" });
+    }
+
+    const filePath = path.join(EVENTS_UPLOAD_PATH, media.url);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    await prisma.eventMedia.delete({
+      where: { id: mediaId }
+    });
+
+    res.json({ message: "Mídia removida com sucesso" });
+  } catch (error) {
+    console.error('Erro ao deletar mídia:', error);
+    res.status(500).json({ error: "Erro ao remover mídia" });
   }
 };

@@ -1,40 +1,59 @@
+// src/config/multer.js
 import multer from 'multer';
-import path from 'path';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import paths from './paths.js';  // ← caminho absoluto unificado
+
+// Pasta absoluta para uploads gerais (portfólio)
+const uploadDir = paths.UPLOAD_ROOT;
+
+// Cria a pasta se não existir (executa no carregamento do módulo)
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`📁 Pasta de upload criada automaticamente: ${uploadDir}`);
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Os arquivos serão salvos na pasta 'uploads' na raiz do projeto
-    cb(null, 'uploads/');
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Geramos um nome único para o arquivo para evitar sobreposição
     const fileHash = crypto.randomBytes(10).toString('hex');
-    const fileName = `${fileHash}-${file.originalname}`;
+    // Limpa nome original: remove espaços, caracteres especiais, mantém extensão
+    const safeOriginalName = file.originalname
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-_.]/g, '')
+      .toLowerCase();
+
+    const fileName = `${fileHash}-${safeOriginalName}`;
     cb(null, fileName);
   }
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = [
+  const allowedTypes = [
     'image/jpeg',
+    'image/jpg',
     'image/png',
     'image/webp',
-    'video/mp4',
-    'video/quicktime'
+    'image/gif'
+    // 'video/mp4',  // descomente se quiser permitir vídeos no portfólio geral
   ];
 
-  if (allowedMimeTypes.includes(file.mimetype)) {
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Tipo de arquivo inválido. Apenas imagens e vídeos são permitidos.'));
+    cb(new Error(
+      'Tipo de arquivo inválido. Apenas imagens são permitidas (JPEG, PNG, WEBP, GIF).'
+    ), false);
   }
 };
 
-export const upload = multer({ 
+export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024 // Limite de 50MB para vídeos
+    fileSize: 10 * 1024 * 1024,  // 10MB por arquivo (ajuste se necessário)
   }
 });

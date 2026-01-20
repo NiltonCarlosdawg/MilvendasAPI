@@ -1,36 +1,33 @@
+// src/controllers/UserController.js
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const getAdminProfile = async (req, res) => {
   try {
-    console.log('🔍 Buscando perfil. User ID:', req.userId); // DEBUG
-    console.log('🔍 Tipo do User ID:', typeof req.userId); // DEBUG
+    console.log('req.user completo:', req.user);          // ← DEBUG
+    console.log('Tentando buscar usuário com id:', req.user?.id);
 
-    // O req.userId é injetado pelo authMiddleware após validar o Token JWT
+    if (!req.user?.id) {
+      return res.status(401).json({ error: 'Usuário não autenticado no middleware' });
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: req.userId }, // Se o ID for string no Prisma, isso funcionará
+      where: { id: req.user.id },
       select: {
         id: true,
         name: true,
         email: true,
         role: true
-        // Senha excluída automaticamente por não estar no select
       }
     });
 
-    console.log('📦 Usuário encontrado:', user); // DEBUG
-
     if (!user) {
-      console.log('❌ Usuário não existe no banco'); // DEBUG
-      return res.status(404).json({ error: "Administrador não encontrado" });
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
     res.json(user);
   } catch (error) {
-    console.error('❌ Erro completo:', error); // DEBUG MELHORADO
-    res.status(500).json({ 
-      error: "Erro ao carregar perfil do admin",
-      details: error.message // Apenas em desenvolvimento
-    });
+    console.error('Erro ao buscar perfil:', error);
+    res.status(500).json({ error: 'Erro interno ao carregar perfil' });
   }
 };

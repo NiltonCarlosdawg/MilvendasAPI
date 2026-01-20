@@ -5,11 +5,11 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// Importações para Documentação (Swagger)
+// Imports para Swagger
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 
-// IMPORTAÇÃO DAS ROTAS MODULARES
+// Rotas
 import authRoutes from './routes/auth.routes.js';
 import portfolioRoutes from './routes/portfolio.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
@@ -17,7 +17,10 @@ import newsletterRoutes from './routes/newsletter.routes.js';
 import userRoutes from './routes/user.routes.js';
 import eventRoutes from './routes/events.routes.js';
 
-// Configurações de caminho (ES Modules)
+// Config de caminhos absolutos (nova)
+import paths from './config/paths.js';
+
+// Config ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -25,31 +28,32 @@ dotenv.config();
 
 const app = express();
 
-// Porta dinâmica para o Render ou 3001 para Local
-const PORT = process.env.PORT || 3001; 
+const PORT = process.env.PORT || 3001;
 
 // ========================================
-// CONFIGURAÇÃO CORS SEGURA
+// CRIAR PASTAS DE UPLOAD NO BOOT (correção crítica)
+// ========================================
+const uploadDirs = [paths.UPLOAD_ROOT, paths.EVENTS_UPLOAD];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`📁 Pasta criada: ${dir}`);
+  }
+});
+
+// ========================================
+// CORS (mantido exatamente como estava)
 // ========================================
 const corsOptions = {
   origin: function (origin, callback) {
-    // Lista de origens permitidas
     const allowedOrigins = [
-      // Desenvolvimento local (sempre permitido)
       'http://localhost:3000',
       'http://localhost:5173',
       'http://localhost:4200',
       'http://127.0.0.1:3000',
-      
-      // Produção (defina no .env)
       process.env.FRONTEND_URL,
-      
-      // Adicione seus domínios aqui se tiver
-      // 'https://seu-dominio.com',
-      // 'https://www.seu-dominio.com'
-    ].filter(Boolean); // Remove valores undefined/null
+    ].filter(Boolean);
 
-    // Permitir requisições sem origin (mobile apps, Postman, etc)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -58,68 +62,25 @@ const corsOptions = {
       callback(new Error('Origem não permitida pelo CORS'));
     }
   },
-  credentials: true,                    // Permitir cookies e headers de autenticação
-  optionsSuccessStatus: 200,           // Para browsers antigos
+  credentials: true,
+  optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With',
-    'Accept'
-  ],
-  exposedHeaders: ['Authorization'],   // Headers que o cliente pode acessar
-  maxAge: 86400                        // Cache da preflight request (24 horas)
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Authorization'],
+  maxAge: 86400
 };
 
-// ========================================
-// MIDDLEWARES GLOBAIS
-// ========================================
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ========================================
-// GARANTIR PASTA UPLOADS
+// SERVIR UPLOADS (antes das rotas API - correção de ordem)
 // ========================================
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+app.use('/uploads', express.static(paths.UPLOAD_ROOT));  // usando caminho absoluto
 
 // ========================================
-// CONFIGURAÇÃO DO SWAGGER
-// ========================================
-const serverUrl = process.env.NODE_ENV === 'production' 
-  ? 'https://milvendasapi.onrender.com'
-  : `http://localhost:${PORT}`;
-
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'API MilVendas',
-      version: '1.0.0',
-      description: 'Documentação do Backend CMS e Portfólio (v1)',
-    },
-    servers: [{ url: serverUrl }],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
-    },
-  },
-  apis: ['./src/routes/*.js'], 
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// ========================================
-// DEFINIÇÃO DAS ROTAS (VERSIONAMENTO V1)
+// ROTAS
 // ========================================
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
@@ -128,40 +89,115 @@ app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/newsletter', newsletterRoutes);
 app.use('/api/v1/events', eventRoutes);
 
-// Servir arquivos estáticos com CORS
-app.use('/uploads', cors(corsOptions), express.static(uploadDir));
+// ========================================
+// SWAGGER (mantido)
+// ========================================
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'MilVendas API',
+      version: '1.0.0',
+      description: 'API do sistema Mil Vendas',
+    },
+    servers: [
+      { url: `http://localhost:${PORT}` },
+      { url: process.env.FRONTEND_URL }
+    ],
+  },
+  apis: ['./src/routes/*.js', './src/controllers/*.js'],  // ajuste se precisar
+};
+
+const specs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // ========================================
-// ROTA RAIZ - HEALTH CHECK
+// HEALTH + 404 (mantido)
 // ========================================
 app.get('/', (req, res) => {
-  res.json({ 
-    status: 'API Online', 
-    version: 'v1',
-    endpoints_base: '/api/v1',
-    documentation: `${serverUrl}/api-docs`,
-    cors_enabled: true
+  res.json({ message: 'API MilVendas rodando!' });
+});
+
+app.get('/api/v1/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Rota não encontrada',
+    message: `A rota ${req.originalUrl} não existe nesta API`,
+    availableRoutes: [
+      'GET /',
+      'GET /api-docs',
+      'GET /api/v1/health',
+      'POST /api/v1/auth/register',
+      'POST /api/v1/auth/login',
+      'GET /api/v1/users/me',
+      'GET /api/v1/portfolio',
+      'GET /api/v1/settings',
+      'GET /api/v1/events',
+      'POST /api/v1/newsletter/subscribe'
+    ]
   });
 });
 
 // ========================================
-// HANDLER DE ERROS CORS
+// VALIDAÇÃO DE ENV (melhorada, mas mantendo compatibilidade)
 // ========================================
-app.use((err, req, res, next) => {
-  if (err.message === 'Origem não permitida pelo CORS') {
-    return res.status(403).json({ 
-      error: 'Acesso negado pelo CORS',
-      message: 'Origem não autorizada para acessar esta API'
-    });
+const validateEnv = () => {
+  const required = ['DATABASE_URL', 'JWT_SECRET'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    console.error('❌ ERRO: Variáveis obrigatórias ausentes:');
+    missing.forEach(key => console.error(`   - ${key}`));
+    process.exit(1);
   }
-  next(err);
-});
+  
+  if (process.env.JWT_SECRET.length < 32) {
+    console.warn('⚠️ JWT_SECRET curto (<32 chars) - use uma chave mais forte');
+  }
+  
+  console.log('✅ Env validado');
+};
+
+validateEnv();
 
 // ========================================
-// INICIALIZAÇÃO DO SERVIDOR
+// START SERVER
 // ========================================
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor MilVendas rodando na porta ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  const serverUrl = `http://localhost:${PORT}`;
+  console.log('\n========================================');
+  console.log('🚀 Servidor MilVendas rodando com sucesso!');
+  console.log('========================================');
+  console.log(`📍 URL: ${serverUrl}`);
+  console.log(`🔢 Porta: ${PORT}`);
+  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📄 Documentação: ${serverUrl}/api-docs`);
-  console.log(`🔒 CORS ativado e configurado`);
+  console.log(`🔒 CORS: Ativado`);
+  console.log(`📁 Uploads: ${paths.UPLOAD_ROOT}`);
+  console.log(`📁 Events: ${paths.EVENTS_UPLOAD}`);
+  console.log('========================================\n');
+});
+
+// Graceful shutdown + erros (mantido)
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM recebido. Encerrando...');
+  server.close(() => process.exit(0));
+});
+
+process.on('SIGINT', () => {
+  console.log('👋 SIGINT recebido. Encerrando...');
+  server.close(() => process.exit(0));
 });

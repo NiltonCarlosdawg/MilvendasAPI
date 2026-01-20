@@ -12,6 +12,7 @@ model User {
   name     String
   email    String @unique
   password String
+  role     String @default("admin") // Campo necessário
 }
 
 model HomeContent {
@@ -116,7 +117,7 @@ model EventMedia {
   
   // Tipo de mídia
   mediaType   String   // "image" ou "video"
-  mediaUrl    String   // Nome do arquivo
+  url    String   // Nome do arquivo
   
   // Informações adicionais
   title       String?  // Título/legenda da mídia

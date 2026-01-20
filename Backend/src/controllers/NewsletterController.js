@@ -1,40 +1,34 @@
+// src/controllers/NewsletterController.js
 import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
 
 // ========================================
-// CONFIGURAÇÃO DO TRANSPORTER
+// CONFIGURAÇÃO DO TRANSPORTER COM VALIDAÇÃO OBRIGATÓRIA
 // ========================================
 const createTransporter = () => {
-  // Para PRODUÇÃO, use um serviço real (Gmail, SendGrid, AWS SES, etc)
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    throw new Error(
+      'Configurações de email incompletas: EMAIL_USER e EMAIL_PASS são obrigatórios no .env'
+    );
+  }
+
   if (process.env.NODE_ENV === 'production') {
-    // Exemplo com Gmail (requer App Password)
+    // Produção: use Gmail com App Password ou serviço como SendGrid/Resend
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App Password do Gmail
+        pass: process.env.EMAIL_PASS, // App Password, NÃO senha normal
       },
     });
-    
-    // Ou use SendGrid/AWS SES para alto volume:
-    /*
-    return nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
-      }
-    });
-    */
   }
-  
-  // Para DESENVOLVIMENTO, use Mailtrap
+
+  // Desenvolvimento: Mailtrap ou similar
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "sandbox.smtp.mailtrap.io",
-    port: process.env.EMAIL_PORT || 2525,
+    host: process.env.EMAIL_HOST || 'sandbox.smtp.mailtrap.io',
+    port: parseInt(process.env.EMAIL_PORT || '2525'),
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -43,221 +37,159 @@ const createTransporter = () => {
 };
 
 // ========================================
-// SUBSCRIÇÃO (Rota Pública)
+// SUBSCRIÇÃO (pública)
 // ========================================
 export const subscribe = async (req, res) => {
   try {
     const { email } = req.body;
-    
-    // Validação básica
+
     if (!email || !email.includes('@')) {
-      return res.status(400).json({ error: "Email inválido" });
+      return res.status(400).json({ error: 'Email inválido' });
     }
 
-    // Verificar se já existe
     const existing = await prisma.newsletter.findUnique({ where: { email } });
     if (existing) {
-      return res.status(400).json({ 
-        message: "Este email já está inscrito na newsletter." 
+      if (existing.active) {
+        return res.status(200).json({ message: 'Email já inscrito' });
+      }
+      // Reativar se estava inativo
+      await prisma.newsletter.update({
+        where: { email },
+        data: { active: true }
       });
+      return res.status(200).json({ message: 'Inscrição reativada' });
     }
 
-    // Criar inscrição
-    await prisma.newsletter.create({ data: { email } });
-    
-    // Enviar email de boas-vindas (opcional)
+    await prisma.newsletter.create({
+      data: { email, active: true }
+    });
+
+    // Enviar email de boas-vindas (opcional, mas recomendado)
     await sendWelcomeEmail(email);
-    
+
     res.status(201).json({ 
-      message: "Inscrição realizada com sucesso! Verifique seu email." 
+      message: 'Inscrição realizada com sucesso! Verifique sua caixa de entrada.' 
     });
   } catch (error) {
-    console.error("Erro ao processar inscrição:", error);
-    res.status(500).json({ error: "Erro ao processar inscrição." });
+    console.error('Erro na inscrição:', error);
+    res.status(500).json({ error: 'Erro ao processar inscrição' });
   }
 };
 
 // ========================================
-// ENVIO DE EMAIL DE BOAS-VINDAS
+// EMAIL DE BOAS-VINDAS
 // ========================================
 const sendWelcomeEmail = async (email) => {
   try {
     const transporter = createTransporter();
-    
+
+    const unsubscribeLink = `${process.env.FRONTEND_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
+
     await transporter.sendMail({
       from: '"Mil Vendas" <noreply@milvendas.com>',
       to: email,
-      subject: 'Bem-vindo à Newsletter Mil Vendas',
+      subject: 'Bem-vindo à Newsletter Mil Vendas!',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #007bff;">Obrigado por se inscrever! 🎉</h2>
-          <p>Bem-vindo à newsletter da Mil Vendas.</p>
-          <p>Em breve você receberá nossas novidades e ofertas exclusivas.</p>
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-          <p style="font-size: 12px; color: #999;">
-            Você está recebendo este email porque se inscreveu na nossa newsletter.
-          </p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2>Olá! Bem-vindo(a) à nossa comunidade</h2>
+          <p>Você agora recebe novidades, dicas e promoções exclusivas da Mil Vendas.</p>
+          <p><a href="${unsubscribeLink}" style="color: #007bff;">Cancelar inscrição</a></p>
         </div>
       `
     });
   } catch (error) {
-    console.error("Erro ao enviar email de boas-vindas:", error);
-    // Não falhar a inscrição se o email falhar
+    console.error('Falha ao enviar email de boas-vindas:', error.message);
+    // Não crasha o subscribe por causa do email
   }
 };
 
 // ========================================
-// BROADCAST - ENVIO EM LOTE (Privado)
+// BROADCAST (admin) – APENAS PARA SUBSCRIBERS ATIVOS
 // ========================================
 export const sendBroadcast = async (req, res) => {
   try {
     const { subject, message } = req.body;
 
     if (!subject || !message) {
-      return res.status(400).json({ 
-        error: "Assunto e mensagem são obrigatórios." 
-      });
+      return res.status(400).json({ error: 'Assunto e mensagem são obrigatórios' });
     }
 
-    // 1. Buscar todos os destinatários ativos
-    const users = await prisma.user.findMany({ 
-      select: { email: true } 
-    });
-    
-    const subscribers = await prisma.newsletter.findMany({ 
-      where: { active: true }, 
-      select: { email: true } 
+    const subscribers = await prisma.newsletter.findMany({
+      where: { active: true },
+      select: { email: true }
     });
 
-    // 2. Unificar emails (remover duplicados)
-    const allEmails = [...new Set([
-      ...users.map(u => u.email),
-      ...subscribers.map(s => s.email)
-    ])];
-
-    if (allEmails.length === 0) {
-      return res.status(400).json({ 
-        error: "Nenhum destinatário encontrado." 
-      });
+    if (subscribers.length === 0) {
+      return res.status(400).json({ error: 'Nenhum inscrito ativo para enviar' });
     }
 
-    // 3. Enviar em lotes (SOLUÇÃO SEGURA)
-    const results = await sendEmailsInBatches(allEmails, subject, message);
+    const transporter = createTransporter();
+    const BATCH_SIZE = 50;
+    const DELAY_MS = 1000; // 1s entre batches
+    let success = 0;
+    let failed = 0;
 
-    res.json({ 
-      message: `Newsletter processada!`,
-      total: allEmails.length,
-      enviados: results.success,
-      falhas: results.failed
-    });
-    
-  } catch (error) {
-    console.error("Erro no broadcast:", error);
-    res.status(500).json({ error: "Falha ao enviar newsletter." });
-  }
-};
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE).map(s => s.email);
 
-// ========================================
-// ENVIO EM LOTES COM CONTROLE DE TAXA
-// ========================================
-const sendEmailsInBatches = async (emails, subject, message) => {
-  const transporter = createTransporter();
-  const BATCH_SIZE = 10;  // Enviar 10 emails por vez
-  const DELAY_MS = 2000;   // Aguardar 2 segundos entre lotes
-  
-  let successCount = 0;
-  let failedCount = 0;
-  const failedEmails = [];
+      await Promise.allSettled(
+        batch.map(async (email) => {
+          const unsubscribeLink = `${process.env.FRONTEND_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
 
-  // Dividir emails em lotes
-  for (let i = 0; i < emails.length; i += BATCH_SIZE) {
-    const batch = emails.slice(i, i + BATCH_SIZE);
-    
-    // Enviar cada email individualmente (mais controle)
-    const promises = batch.map(email => 
-      sendIndividualEmail(transporter, email, subject, message)
-        .then(() => successCount++)
-        .catch(err => {
-          failedCount++;
-          failedEmails.push(email);
-          console.error(`Falha ao enviar para ${email}:`, err.message);
+          await transporter.sendMail({
+            from: '"Mil Vendas" <noreply@milvendas.com>',
+            to: email,
+            subject,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px;">
+                ${message}
+                <hr style="margin: 20px 0;">
+                <p style="font-size: 12px; color: #666;">
+                  <a href="${unsubscribeLink}">Cancelar inscrição</a>
+                </p>
+              </div>
+            `
+          });
+          success++;
         })
-    );
+      );
 
-    await Promise.allSettled(promises);
-    
-    // Aguardar antes do próximo lote (Rate Limiting)
-    if (i + BATCH_SIZE < emails.length) {
-      await sleep(DELAY_MS);
+      if (i + BATCH_SIZE < subscribers.length) {
+        await new Promise(r => setTimeout(r, DELAY_MS));
+      }
     }
+
+    res.json({
+      message: 'Envio concluído',
+      success,
+      failed: subscribers.length - success,
+      total: subscribers.length
+    });
+  } catch (error) {
+    console.error('Erro no broadcast:', error);
+    res.status(500).json({ error: 'Erro ao enviar newsletter' });
   }
-
-  return {
-    success: successCount,
-    failed: failedCount,
-    failedEmails
-  };
 };
 
 // ========================================
-// ENVIO INDIVIDUAL COM UNSUBSCRIBE
-// ========================================
-const sendIndividualEmail = async (transporter, email, subject, message) => {
-  const unsubscribeLink = `${process.env.FRONTEND_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
-  
-  const mailOptions = {
-    from: '"Mil Vendas" <noreply@milvendas.com>',
-    to: email, // ✅ Um destinatário por vez
-    subject: subject,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #007bff;">Mil Vendas Newsletter</h2>
-        <div style="margin: 30px 0; font-size: 16px; line-height: 1.6;">
-          ${message}
-        </div>
-        <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
-        <div style="font-size: 12px; color: #999; text-align: center;">
-          <p>Você está recebendo este email porque faz parte da nossa lista.</p>
-          <p>
-            <a href="${unsubscribeLink}" style="color: #007bff; text-decoration: none;">
-              Cancelar inscrição
-            </a>
-          </p>
-        </div>
-      </div>
-    `
-  };
-
-  return transporter.sendMail(mailOptions);
-};
-
-// ========================================
-// CANCELAR INSCRIÇÃO (Rota Pública)
+// CANCELAR INSCRIÇÃO (pública)
 // ========================================
 export const unsubscribe = async (req, res) => {
   try {
     const { email } = req.query;
 
     if (!email) {
-      return res.status(400).json({ error: "Email não fornecido" });
+      return res.status(400).json({ error: 'Email não fornecido' });
     }
 
-    // Desativar ao invés de deletar (para histórico)
     await prisma.newsletter.updateMany({
       where: { email },
       data: { active: false }
     });
 
-    res.json({ 
-      message: "Você foi removido da nossa lista de emails." 
-    });
+    res.json({ message: 'Inscrição cancelada com sucesso' });
   } catch (error) {
-    console.error("Erro ao cancelar inscrição:", error);
-    res.status(500).json({ error: "Erro ao processar cancelamento." });
+    console.error('Erro ao cancelar inscrição:', error);
+    res.status(500).json({ error: 'Erro ao cancelar inscrição' });
   }
 };
-
-// ========================================
-// FUNÇÃO AUXILIAR - SLEEP
-// ========================================
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));

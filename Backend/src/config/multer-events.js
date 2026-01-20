@@ -1,16 +1,17 @@
+// src/config/multer-events.js
 import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
+import paths from './paths.js';  // ← caminho absoluto unificado
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Pasta absoluta para uploads de eventos
+const uploadDir = paths.EVENTS_UPLOAD;
 
-// Criar pasta de uploads para eventos
-const uploadDir = path.join(__dirname, '../../uploads/events');
+// Cria a pasta automaticamente ao carregar o módulo (segurança extra)
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`📁 Pasta de eventos criada automaticamente: ${uploadDir}`);
 }
 
 const storage = multer.diskStorage({
@@ -19,7 +20,14 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const fileHash = crypto.randomBytes(10).toString('hex');
-    const fileName = `${fileHash}-${file.originalname}`;
+    
+    // Sanitiza o nome original: remove espaços, caracteres especiais, mantém extensão
+    const safeName = file.originalname
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-_.]/g, '')
+      .toLowerCase();
+
+    const fileName = `${fileHash}-${safeName}`;
     cb(null, fileName);
   }
 });
@@ -32,25 +40,26 @@ const fileFilter = (req, file, cb) => {
     'image/png',
     'image/webp',
     'image/gif',
-    
     // Vídeos
     'video/mp4',
-    'video/quicktime',
-    'video/x-msvideo',
+    'video/quicktime',     // .mov
+    'video/x-msvideo',     // .avi
     'video/webm'
   ];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Tipo de arquivo inválido. Apenas imagens (JPEG, PNG, WEBP, GIF) e vídeos (MP4, MOV, WEBM) são permitidos.'));
+    cb(new Error(
+      'Tipo de arquivo inválido. Apenas imagens (JPEG, PNG, WEBP, GIF) e vídeos (MP4, MOV, WEBM, AVI) são permitidos.'
+    ), false);
   }
 };
 
-export const uploadEvents = multer({ 
+export const uploadEvents = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024 // Limite de 100MB (para vídeos)
+    fileSize: 100 * 1024 * 1024,  // 100MB – suficiente para vídeos curtos de eventos
   }
 });
