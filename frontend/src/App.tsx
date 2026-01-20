@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // JSX removido daqui para evitar o erro TS1484
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -51,17 +51,25 @@ const WatermarkBackground = () => (
   </div>
 );
 
-// Alterado para React.ReactNode ou removido o import de JSX para compatibilidade
+// ROTA PROTEGIDA MELHORADA
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+  
   return user ? <>{children}</> : <Navigate to="/auth/login" replace />;
 };
 
 function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // Adicionado loading aqui para controle de rotas
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 6000);
@@ -69,6 +77,10 @@ function AppContent() {
   }, []);
 
   const isAdminRoute = location.pathname.startsWith('/auth/admin');
+
+  // Se estiver carregando o Auth E o splash já acabou, mostra um loader simples 
+  // para evitar flashes de conteúdo ou redirecionamentos errados
+  const isSyncing = loading && !showSplash;
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500 relative">
@@ -83,53 +95,58 @@ function AppContent() {
           transition={{ duration: 1 }}
           className="relative"
         >
-          <WatermarkBackground />
-
+          {!isAdminRoute && <WatermarkBackground />}
           {!isAdminRoute && <Navbar />}
           
           <div className="relative z-10">
-            <Routes location={location} key={location.pathname}>
-              {/* LANDING PAGE */}
-              <Route path="/" element={
-                <div className="space-y-0">
-                  <Hero />
-                  <div className="bg-white/40 dark:bg-slate-950/40 backdrop-blur-[2px]">
-                    <About />
-                    <Services />
-                    <Contact />
+            {isSyncing ? (
+               <div className="min-h-screen flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+               </div>
+            ) : (
+              <Routes location={location} key={location.pathname}>
+                {/* LANDING PAGE */}
+                <Route path="/" element={
+                  <div className="space-y-0">
+                    <Hero />
+                    <div className="bg-white/40 dark:bg-slate-950/40 backdrop-blur-[2px]">
+                      <About />
+                      <Services />
+                      <Contact />
+                    </div>
+                    <Footer />
+                    <WhatsappButton />
                   </div>
-                  <Footer />
-                  <WhatsappButton />
-                </div>
-              } />
+                } />
 
-              {/* PÁGINAS INDEPENDENTES */}
-              <Route path="/about" element={<><AboutComplete /><Footer /></>} />
-              <Route path="/news" element={<><News /><Footer /></>} />
-              <Route path="/events" element={<><Events /><Footer /></>} />
-              <Route path="/portfolio" element={<><Portfolio /><Footer /></>} />
+                {/* PÁGINAS PÚBLICAS */}
+                <Route path="/about" element={<><AboutComplete /><Footer /></>} />
+                <Route path="/news" element={<><News /><Footer /></>} />
+                <Route path="/events" element={<><Events /><Footer /></>} />
+                <Route path="/portfolio" element={<><Portfolio /><Footer /></>} />
 
-              {/* Autenticação */}
-              <Route path="/auth/login" element={
-                user ? <Navigate to="/auth/admin/dashboard" replace /> : <Login />
-              } />
-              
-              {/* Painel Administrativo */}
-              <Route path="/auth/admin" element={
-                <ProtectedRoute>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="eventos" element={<EventosPreview />} />
-                <Route path="portifolio" element={<PortifolioPreview />} />
-                <Route path="contactos" element={<ContactosPreview />} />
-                <Route path="newsletter" element={<NewsletterManager />} />
-              </Route>
-              
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                {/* AUTENTICAÇÃO - Melhorada para evitar travamentos */}
+                <Route path="/auth/login" element={
+                  user ? <Navigate to="/auth/admin/dashboard" replace /> : <Login />
+                } />
+                
+                {/* PAINEL ADMINISTRATIVO */}
+                <Route path="/auth/admin" element={
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="eventos" element={<EventosPreview />} />
+                  <Route path="portifolio" element={<PortifolioPreview />} />
+                  <Route path="contactos" element={<ContactosPreview />} />
+                  <Route path="newsletter" element={<NewsletterManager />} />
+                </Route>
+                
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            )}
           </div>
         </motion.div>
       )}
