@@ -1,36 +1,125 @@
-// src/dataProvider.ts
-import simpleRestProvider from 'ra-data-simple-rest';
+import { fetchUtils } from 'react-admin';
 
-const baseDataProvider = simpleRestProvider('http://localhost:3001/api/v1', {
-  httpClient: (url, options = {}) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      options.headers = {
-        ...options.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
-    return fetch(url, options).then(response => {
-      if (response.status >= 200 && response.status < 300) {
-        return response.json().then(json => ({ status: response.status, body: json }));
-      }
-      throw new Error(response.statusText);
-    });
+const baseUrl = 'http://localhost:3001/api/v1';
+
+/**
+ * Helper para injetar o Token em requisições JSON ou FormData
+ */
+const httpClient = async (url: string, options: any = {}) => {
+  const token = localStorage.getItem('token');
+  const headers = new Headers(options.headers || {});
+  
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  // Se o corpo não for FormData, definimos como JSON
+  if (options.body && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `Erro HTTP ${response.status}`);
+  }
+
+  // Se o método for DELETE e não houver corpo, retornamos vazio
+  if (response.status === 204) return { json: {} };
+  
+  return { json: await response.json() };
+};
+
+const dataProvider = {
+  // GET LIST: Resolve o erro de Content-Range ignorando-o e usando o tamanho do array
+  getList: async (resource: string, params: any) => {
+    const { json } = await httpClient(`${baseUrl}/${resource}`);
+    
+    // Garantimos que cada item tem um 'id' (essencial para React Admin)
+    const data = json.map((item: any) => ({
+      ...item,
+      id: item.id || item._id,
+    }));
+
+    return {
+      data,
+      total: data.length, // O React Admin usa isto para paginação interna
+    };
   },
-});
 
-// Wrapper que ignora a exigência de Content-Range
-const customDataProvider = {
-  ...baseDataProvider,
-  getList: (resource, params) => {
-    return baseDataProvider.getList(resource, params).catch(error => {
-      if (error.message.includes('Content-Range')) {
-        // Ignora o erro específico e retorna dados sem paginação completa
-        return baseDataProvider.getList(resource, { ...params, pagination: { page: 1, perPage: 100 } });
-      }
-      throw error;
-    });
+  getOne: async (resource: string, params: any) => {
+    const { json } = await httpClient(`${baseUrl}/${resource}/${params.id}`);
+    return { data: { ...json, id: json.id || json._id } };
+  },
+
+  create: async (resource: string, params: any) => {
+    let body: any;
+    let url = `${baseUrl}/${resource}`;
+
+    if (resource === 'portfolio') {
+      body = new FormData();
+      Object.keys(params.data).forEach(key => {
+        if (key === 'file') {
+          if (params.data.file?.rawFile) body.append('file', params.data.file.rawFile);
+        } else {
+          body.append(key, params.data[key]);
+        }
+      });
+    } else if (resource === 'events') {
+      url = `${baseUrl}/events/admin/create`;
+      body = JSON.stringify(params.data);
+    } else {
+      body = JSON.stringify(params.data);
+    }
+
+    const { json } = await httpClient(url, { method: 'POST', body });
+    return { data: { ...json, id: json.id || json._id } };
+  },
+
+  update: async (resource: string, params: any) => {
+    let body: any;
+    let url = `${baseUrl}/${resource}/${params.id}`;
+
+    if (resource === 'portfolio') {
+      body = new FormData();
+      Object.keys(params.data).forEach(key => {
+        if (key === 'file') {
+          if (params.data.file?.rawFile) body.append('file', params.data.file.rawFile);
+        } else if (key !== 'id') {
+          body.append(key, params.data[key]);
+        }
+      });
+    } else if (resource === 'events') {
+      url = `${baseUrl}/events/admin/${params.id}`;
+      body = JSON.stringify(params.data);
+    } else {
+      body = JSON.stringify(params.data);
+    }
+
+    const { json } = await httpClient(url, { method: 'PUT', body });
+    return { data: { ...json, id: json.id || json._id } };
+  },
+
+  delete: async (resource: string, params: any) => {
+    const url = resource === 'events' 
+      ? `${baseUrl}/events/admin/${params.id}` 
+      : `${baseUrl}/${resource}/${params.id}`;
+
+    await httpClient(url, { method: 'DELETE' });
+    return { data: { id: params.id } };
+  },
+
+  // Métodos adicionais necessários para evitar erros de undefined
+  getMany: async (resource: string, params: any) => {
+    const { json } = await httpClient(`${baseUrl}/${resource}`);
+    return { data: json.filter((item: any) => params.ids.includes(item.id || item._id)) };
+  },
+
+  getManyReference: async (resource: string, params: any) => {
+    const { json } = await httpClient(`${baseUrl}/${resource}`);
+    return { data: json, total: json.length };
   },
 };
 
-export { customDataProvider as dataProvider };
+export default dataProvider;

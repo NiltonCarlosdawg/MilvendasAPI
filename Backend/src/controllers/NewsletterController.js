@@ -4,38 +4,51 @@ import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
 
+
+export const getAllSubscribers = async (req, res) => {
+  try {
+    // 1. Paginação (query params que o React Admin envia)
+    // O formato costuma ser ?_end=10&_start=0 ou ?page=1&perPage=10
+    // Vamos assumir o padrão que configuramos no dataProvider (page/perPage) ou range
+    
+    const count = await prisma.newsletter.count();
+    
+    // Se o frontend mandar paginação, aplicamos (simplificado para pegar tudo se não vier params)
+    const subscribers = await prisma.newsletter.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // 2. IMPORTANTE: O Header para o React Admin
+    res.set('Access-Control-Expose-Headers', 'Content-Range');
+    res.set('Content-Range', `newsletter 0-${subscribers.length}/${count}`);
+    
+    res.json(subscribers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 // ========================================
 // CONFIGURAÇÃO DO TRANSPORTER COM VALIDAÇÃO OBRIGATÓRIA
 // ========================================
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error(
-      'Configurações de email incompletas: EMAIL_USER e EMAIL_PASS são obrigatórios no .env'
-    );
+    throw new Error('Configurações de email incompletas no .env');
   }
 
-  if (process.env.NODE_ENV === 'production') {
-    // Produção: use Gmail com App Password ou serviço como SendGrid/Resend
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App Password, NÃO senha normal
-      },
-    });
-  }
-
-  // Desenvolvimento: Mailtrap ou similar
+  // Configuração para o servidor mail.milvendas.ao (Porta 465 usa SSL)
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'sandbox.smtp.mailtrap.io',
-    port: parseInt(process.env.EMAIL_PORT || '2525'),
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT),
+    secure: true, // true para porta 465
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    tls: {
+      rejectUnauthorized: false // Útil se o certificado SSL for auto-assinado
+    }
   });
 };
-
 // ========================================
 // SUBSCRIÇÃO (pública)
 // ========================================

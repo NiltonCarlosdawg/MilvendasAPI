@@ -5,6 +5,7 @@ import {
   createEvent,
   uploadEventMedia,
   getEvents,
+  getEventById,      // <--- Certifique-se de importar
   getEventBySlug,
   updateEvent,
   deleteEvent,
@@ -17,48 +18,24 @@ import { authMiddleware, requireAdmin } from '../middlewares/auth.js';
 
 const router = Router();
 
-// ========================================
-// ROTAS PÚBLICAS (sem autenticação)
-// ========================================
-
-// Listar eventos publicados
+// ROTAS PÚBLICAS
 router.get('/', getEvents);
-
-// Buscar evento por slug (detalhes públicos)
-router.get('/:slug', getEventBySlug);
-
-// Solicitar ingresso (para eventos próprios que permitem)
+router.get('/s/:slug', getEventBySlug);
 router.post('/:eventId/ticket-request', requestTicket);
 
-// ========================================
-// ROTAS PRIVADAS / ADMIN (exigem autenticação + role admin)
-// ========================================
+// ROTAS ADMIN (CRUD PADRÃO REACT ADMIN)
 
-// Criar novo evento
-router.post('/admin/create', authMiddleware, requireAdmin, createEvent);
+// Buscar por ID (A função getEventById já tem o prisma configurado dentro dela no Controller)
+router.get('/:id', getEventById); 
 
-// Upload de mídia (imagens/vídeos) para evento específico
-router.post(
-  '/admin/:eventId/media',
-  authMiddleware,
-  requireAdmin,
-  uploadEvents.array('files', 11), // máximo 11 arquivos (ex: 10 imagens + 1 vídeo)
-  uploadEventMedia
-);
+router.post('/', authMiddleware, requireAdmin, createEvent);
+router.put('/:id', authMiddleware, requireAdmin, updateEvent);
+router.delete('/:id', authMiddleware, requireAdmin, deleteEvent);
 
-// Atualizar evento
-router.put('/admin/:id', authMiddleware, requireAdmin, updateEvent);
-
-// Deletar evento (e suas mídias/solicitações associadas)
-router.delete('/admin/:id', authMiddleware, requireAdmin, deleteEvent);
-
-// Deletar mídia específica de um evento
+// OUTRAS ROTAS
+router.post('/:eventId/media', authMiddleware, requireAdmin, uploadEvents.array('files', 11), uploadEventMedia);
+router.get('/:eventId/ticket-requests', authMiddleware, requireAdmin, getTicketRequests);
 router.delete('/admin/media/:mediaId', authMiddleware, requireAdmin, deleteEventMedia);
-
-// Listar solicitações de ingresso de um evento
-router.get('/admin/:eventId/ticket-requests', authMiddleware, requireAdmin, getTicketRequests);
-
-// Atualizar status de uma solicitação de ingresso
 router.patch('/admin/ticket-requests/:requestId', authMiddleware, requireAdmin, updateTicketRequestStatus);
 
 export default router;

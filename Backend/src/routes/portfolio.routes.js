@@ -1,8 +1,10 @@
+// src/routes/portfolio.routes.js
 import { Router } from 'express';
-import { upload } from '../config/multer.js'; // Ajuste o caminho conforme sua estrutura real
+import { upload } from '../config/multer.js';
 import { 
   createItem, 
   getPortfolio, 
+  getPortfolioById, // Importa a função de busca por ID
   updateItem, 
   deleteItem 
 } from '../controllers/PortfolioController.js';
@@ -10,11 +12,19 @@ import { authMiddleware } from '../middlewares/auth.js';
 
 const router = Router();
 
-// Prefixo esperado: /api/v1/portfolio
+/**
+ * Prefixo da Rota: /api/v1/portfolio
+ */
 
-router.get('/', getPortfolio);                                      // GET /api/v1/portfolio
-router.post('/', authMiddleware, upload.single('file'), createItem); // POST /api/v1/portfolio
-router.put('/:id', authMiddleware, upload.single('file'), updateItem); // PUT /api/v1/portfolio/:id
-router.delete('/:id', authMiddleware, deleteItem);                   // DELETE /api/v1/portfolio/:id
+// Rota Pública: Listar todos
+router.get('/', getPortfolio);                                      
+
+// Rota de Admin/Edição: Buscar um item específico por ID (CORRIGE O ERRO 404 NO EDIT)
+router.get('/:id', getPortfolioById);                               
+
+// Rotas Protegidas (Criação, Atualização e Eliminação)
+router.post('/', authMiddleware, upload.single('file'), createItem); 
+router.put('/:id', authMiddleware, upload.single('file'), updateItem); 
+router.delete('/:id', authMiddleware, deleteItem);                   
 
 export default router;

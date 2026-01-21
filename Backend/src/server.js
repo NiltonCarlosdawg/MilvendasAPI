@@ -153,7 +153,8 @@ app.use((req, res) => {
       'GET /api/v1/portfolio',
       'GET /api/v1/settings',
       'GET /api/v1/events',
-      'POST /api/v1/newsletter/subscribe'
+      'POST /api/v1/newsletter/subscribe',
+      'GET /api/v1/newsletter/unsubscribe'
     ]
   });
 });

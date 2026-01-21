@@ -1,53 +1,40 @@
-// src/App.tsx
 import { Admin, Resource } from 'react-admin';
-import simpleRestProvider from 'ra-data-simple-rest';
+import MailIcon from '@mui/icons-material/Mail';
 import authProvider from './authProvider';
-
-// Importa os componentes do resource de eventos (já criados na pasta resources/events)
+import dataProvider from './dataProvider'; // Importa o ficheiro externo corrigido
 import { EventList, EventEdit, EventCreate } from './resources/events';
-
-// URL base da sua API (ajuste se mudar a porta ou deployar)
-const apiUrl = 'http://localhost:3001/api/v1';
-
-const dataProvider = simpleRestProvider(apiUrl, {
-  // Adiciona o token JWT automaticamente em todas as requisições
-  httpClient: async (url, options = {}) => {
-    if (!options.headers) {
-      options.headers = new Headers({ Accept: 'application/json' });
-    }
-    const token = localStorage.getItem('token');
-    if (token) {
-      options.headers.set('Authorization', `Bearer ${token}`);
-    }
-    const response = await fetch(url, options);
-    if (response.status >= 200 && response.status < 300) {
-      const json = await response.json();
-      return { status: response.status, body: json };
-    }
-    throw new Error(response.statusText);
-  },
-});
+import { PortfolioList, PortfolioCreate, PortfolioEdit } from './resources/portfolio';
+import { NewsletterList } from './resources/newsletter/NewsletterList';
+import { NewsletterSend } from './resources/newsletter/NewsletterSend';
 
 const App = () => (
-  <Admin
-    authProvider={authProvider}
-    dataProvider={dataProvider}
+  <Admin 
     title="Mil Vendas Admin"
-    // Opcional: dashboard customizado no futuro
-    // dashboard={Dashboard}
+    authProvider={authProvider} 
+    dataProvider={dataProvider} // Usa o provider que já trata FormData e Auth
   >
-    {/* Resource de Eventos */}
+    <Resource 
+      name="events" 
+      list={EventList} 
+      create={EventCreate} 
+      edit={EventEdit} 
+      options={{ label: 'Eventos' }}
+    />
     <Resource
-      name="events"
-      list={EventList}
-      edit={EventEdit}
-      create={EventCreate}
-      // icon={<EventIcon />} // descomente se adicionar ícones do MUI
+      name="portfolio"
+      list={PortfolioList}
+      create={PortfolioCreate}
+      edit={PortfolioEdit}
+      options={{ label: 'Portfólio' }}
     />
 
-    {/* Adicione outros resources aqui nas próximas fases */}
-    {/* <Resource name="portfolio" list={PortfolioList} ... /> */}
-    {/* <Resource name="newsletter" list={NewsletterList} ... /> */}
+    <Resource
+      name="newsletter"
+      list={NewsletterList}
+      create={NewsletterSend} // Clicar em "Criar" vai para a tela de Envio
+      options={{ label: 'Newsletter' }}
+      icon={MailIcon}
+    />
   </Admin>
 );
 
