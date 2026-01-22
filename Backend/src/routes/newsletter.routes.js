@@ -59,21 +59,14 @@ router.post('/broadcast', authMiddleware, sendBroadcast);
 
 // ROTA DE UPLOAD: Transforma ficheiro local numa URL pública para o e-mail
 router.post('/upload-image', authMiddleware, upload.single('file'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Nenhum ficheiro enviado' });
-    }
+  // Verifique se está em produção ou desenvolvimento
+  const domain = process.env.NODE_ENV === 'production' 
+    ? 'https://milvendasapi.onrender.com' // O seu domínio real
+    : `${req.protocol}://${req.get('host')}`; // localhost em dev
 
-    // Gera a URL completa para ser inserida no template ({{imagem_evento}})
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    
-    res.json({ 
-      url: imageUrl,
-      filename: req.file.filename 
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao processar upload da imagem' });
-  }
+  const imageUrl = `${domain}/uploads/${req.file.filename}`;
+  
+  res.json({ url: imageUrl });
 });
 
 export default router;
