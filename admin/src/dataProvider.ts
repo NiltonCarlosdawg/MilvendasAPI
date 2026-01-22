@@ -67,7 +67,7 @@ const dataProvider = {
         }
       });
     } else if (resource === 'events') {
-      url = `${baseUrl}/events/admin/create`;
+      url = `${baseUrl}/events`;
       body = JSON.stringify(params.data);
     } else {
       body = JSON.stringify(params.data);
