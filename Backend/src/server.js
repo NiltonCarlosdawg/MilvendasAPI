@@ -94,7 +94,22 @@ console.log('✅ Middleware de paginação (Content-Range) carregado');
 // ========================================
 // SERVIR UPLOADS (antes das rotas API)
 // ========================================
-app.use('/uploads', express.static(paths.UPLOAD_ROOT));
+app.use('/uploads', express.static(paths.UPLOAD_ROOT, {
+  setHeaders: (res, path) => {
+    // 1. Garante que qualquer origem (incluindo proxies de email como o do Google) aceda à imagem
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // 2. Cache de longa duração ajuda os clientes de email a carregar a imagem com sucesso
+    res.set('Cache-Control', 'public, max-age=31536000');
+    
+    // 3. Forçar o tipo de conteúdo correto para evitar bloqueios de segurança
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) res.set('Content-Type', 'image/jpeg');
+    if (path.endsWith('.png')) res.set('Content-Type', 'image/png');
+    if (path.endsWith('.gif')) res.set('Content-Type', 'image/gif');
+  }
+}));
 
 // ========================================
 // ROTAS

@@ -1,6 +1,6 @@
 import { fetchUtils } from 'react-admin';
 
-const baseUrl = 'http://localhost:3001/api/v1';
+const baseUrl = 'https://milvendasapi.onrender.com/api/v1';
 
 /**
  * Helper para injetar o Token em requisições JSON ou FormData

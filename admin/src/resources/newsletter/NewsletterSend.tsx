@@ -88,7 +88,7 @@ export const NewsletterSend = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://milvendasapi.onrender,com/api/v1/newsletter/broadcast', {
+            const response = await fetch('https://milvendasapi.onrender.com/api/v1/newsletter/broadcast', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
