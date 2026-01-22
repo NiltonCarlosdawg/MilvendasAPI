@@ -55,7 +55,7 @@ const Footer = () => {
             <div className="flex gap-4">
               {[
                 
-                { Icon: Instagram, link: "#" },
+                { Icon: Instagram, link: "https://www.instagram.com/milvendasconsultoria?igsh=MWk0OWpqaTN3bHNjcg%3D%3D&utm_source=qr" },
                 { Icon: Linkedin, link: "#" }
                 
               ].map(({ Icon, link }, i) => (
