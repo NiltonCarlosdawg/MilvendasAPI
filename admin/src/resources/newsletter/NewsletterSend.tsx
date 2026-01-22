@@ -46,7 +46,7 @@ export const NewsletterSend = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3001/api/v1/newsletter/upload-image', {
+            const response = await fetch('https://milvendasapi.onrender.com/api/v1/newsletter/upload-image', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData,

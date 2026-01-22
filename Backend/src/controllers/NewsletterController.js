@@ -7,22 +7,19 @@ const prisma = new PrismaClient();
 // CONFIGURAÇÃO DO TRANSPORTE (ESTÁVEL)
 // ========================================
 const createTransporter = () => {
-  const port = parseInt(process.env.EMAIL_PORT || '465');
-  
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: port,
-    secure: port === 465, // True para 465, false para 587 (STARTTLS)
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-      // Essencial para servidores mail.milvendas.ao ou domínios com certificados auto-assinados
-      rejectUnauthorized: false 
-    },
-    connectionTimeout: 10000, // 10 segundos de timeout
-  });
+  const port = 587; // Mude de 465 para 587
+return nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: port,
+  secure: false, // OBRIGATÓRIO: false para 587
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false 
+  }
+});
 };
 
 // ========================================
