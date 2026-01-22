@@ -1,4 +1,3 @@
-import { fetchUtils } from 'react-admin';
 
 const baseUrl = 'https://milvendasapi.onrender.com/api/v1';
 
@@ -91,7 +90,7 @@ const dataProvider = {
         }
       });
     } else if (resource === 'events') {
-      url = `${baseUrl}/events/admin/${params.id}`;
+      url = `${baseUrl}/events/${params.id}`;
       body = JSON.stringify(params.data);
     } else {
       body = JSON.stringify(params.data);
@@ -103,7 +102,7 @@ const dataProvider = {
 
   delete: async (resource: string, params: any) => {
     const url = resource === 'events' 
-      ? `${baseUrl}/events/admin/${params.id}` 
+      ? `${baseUrl}/events/${params.id}` 
       : `${baseUrl}/${resource}/${params.id}`;
 
     await httpClient(url, { method: 'DELETE' });

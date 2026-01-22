@@ -14,7 +14,7 @@ import {
  * Componente para exibir a miniatura da mídia.
  * Suporta imagens e exibe um ícone/texto para vídeos.
  */
-const PortfolioMediaField = ({ label }: { label?: string }) => {
+const PortfolioMediaField = ({ _label }: { label?: string }) => {
   const record = useRecordContext();
   if (!record?.mediaUrl) return <span>Sem mídia</span>;
 
