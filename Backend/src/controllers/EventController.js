@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const EVENTS_UPLOAD_PATH = paths.EVENTS_UPLOAD;
 
 // ========================================
-// LISTAR EVENTOS (Com paginação React Admin)
+// 1. LISTAR EVENTOS (Admin e Público)
 // ========================================
 export const getEvents = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ export const getEvents = async (req, res) => {
 
     const total = await prisma.event.count({ where });
 
-    // Paginação para React Admin (Header Content-Range)
+    // Paginação compatível com React Admin
     const rangeHeader = req.get('Range') || 'items=0-9';
     const match = rangeHeader.match(/items=(\d+)-(\d+)/);
     
@@ -52,13 +52,13 @@ export const getEvents = async (req, res) => {
 };
 
 // ========================================
-// CRIAR EVENTO (Blindado contra Erro 500)
+// 2. CRIAR EVENTO (Blindado contra Erro 500)
 // ========================================
 export const createEvent = async (req, res) => {
   try {
     const data = req.body;
 
-    // Gerar Slug se não for fornecido
+    // Gerar Slug amigável automático
     const generatedSlug = (data.title || '')
       .toLowerCase()
       .normalize('NFD')
@@ -66,7 +66,7 @@ export const createEvent = async (req, res) => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
 
-    // Construção rigorosa para o Schema.prisma
+    // Mapeamento rigoroso para o Schema do Prisma
     const event = await prisma.event.create({
       data: {
         title: data.title,
@@ -80,10 +80,10 @@ export const createEvent = async (req, res) => {
         capacity: data.capacity ? parseInt(data.capacity, 10) : null,
         allowTicketRequest: String(data.allowTicketRequest) === 'true',
         externalLink: data.externalLink || null,
-        // Enums
+        // Tratamento de Enums
         eventType: data.eventType === 'EXTERNAL' ? 'THIRD_PARTY' : (data.eventType || 'OWN'),
         status: data.status || 'DRAFT',
-        // Datas
+        // Tratamento de Datas
         eventDate: data.eventDate ? new Date(data.eventDate) : new Date(),
         eventEndDate: data.eventEndDate ? new Date(data.eventEndDate) : null,
       }
@@ -92,12 +92,12 @@ export const createEvent = async (req, res) => {
     res.status(201).json(event);
   } catch (error) {
     console.error('Erro ao criar evento:', error);
-    res.status(500).json({ error: error.message, code: error.code });
+    res.status(500).json({ error: error.message, prismaCode: error.code });
   }
 };
 
 // ========================================
-// BUSCAR POR ID OU SLUG
+// 3. BUSCAR POR ID OU SLUG
 // ========================================
 export const getEventById = async (req, res) => {
   try {
@@ -128,14 +128,13 @@ export const getEventBySlug = async (req, res) => {
 };
 
 // ========================================
-// ATUALIZAR EVENTO
+// 4. ATUALIZAR EVENTO (Filtro de Campos)
 // ========================================
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
 
-    // Filtro de campos permitidos para evitar erros de campos inexistentes no Prisma
     const updateData = {};
     const allowed = [
       'title', 'slug', 'eventType', 'status', 'descriptionShort', 'descriptionLong',
@@ -172,7 +171,7 @@ export const updateEvent = async (req, res) => {
 };
 
 // ========================================
-// DELETAR EVENTO E MÍDIAS FÍSICAS
+// 5. ELIMINAÇÃO
 // ========================================
 export const deleteEvent = async (req, res) => {
   try {
@@ -192,7 +191,7 @@ export const deleteEvent = async (req, res) => {
 };
 
 // ========================================
-// GESTÃO DE MÍDIAS (Upload)
+// 6. GESTÃO DE MÍDIAS (Upload/Delete)
 // ========================================
 export const uploadEventMedia = async (req, res) => {
   try {
@@ -230,5 +229,65 @@ export const deleteEventMedia = async (req, res) => {
     res.json({ message: "Mídia eliminada" });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao eliminar mídia' });
+  }
+};
+
+// ========================================
+// 7. INGRESSOS (Ticket Requests) - EXPORTAÇÕES OBRIGATÓRIAS
+// ========================================
+
+export const getTicketRequests = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const requests = await prisma.eventTicketRequest.findMany({
+      where: eventId ? { eventId } : {},
+      orderBy: { createdAt: 'desc' },
+      include: { event: { select: { title: true } } }
+    });
+
+    res.setHeader('Content-Range', `ticket-requests 0-${requests.length}/${requests.length}`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao listar solicitações' });
+  }
+};
+
+export const requestTicket = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const data = req.body;
+
+    const request = await prisma.eventTicketRequest.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || '',
+        quantity: parseInt(data.quantity, 10) || 1,
+        message: data.message || null,
+        status: 'pending',
+        event: { connect: { id: eventId } }
+      }
+    });
+
+    res.status(201).json(request);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao processar ingresso' });
+  }
+};
+
+export const updateTicketRequestStatus = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    const result = await prisma.eventTicketRequest.update({
+      where: { id: requestId },
+      data: { status }
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao atualizar status' });
   }
 };
