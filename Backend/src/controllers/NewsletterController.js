@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // CONFIGURAÇÃO DO TRANSPORTE (ESTÁVEL)
 // ========================================
 const createTransporter = () => {
-  const port = 587; // Mude de 465 para 587
+  const port = 465; // Mude de 465 para 587
 return nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: port,
