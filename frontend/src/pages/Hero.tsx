@@ -1,4 +1,3 @@
-//import React from 'react';
 import { motion } from 'framer-motion';
 import logoMv from '../assets/logo-mv.svg';
 import { useSettings } from '../hooks/useSettings';
@@ -25,12 +24,19 @@ const Hero = () => {
   const whatsappUrl = `https://wa.me/${content.whatsapp}?text=Olá! Gostaria de falar sobre um projeto com a Mil Vendas.`;
 
   if (loading && Object.keys(settings).length === 0) {
-    // Skeleton adaptável ao tema
     return <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-500" />; 
   }
 
   return (
-    <section id="hero" className="min-h-screen flex items-center relative px-6 overflow-hidden bg-transparent">
+    <section id="hero" className="min-h-screen flex items-center relative px-6 overflow-hidden">
+      {/* Imagem de fundo principal */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/40 dark:from-slate-900/80 dark:to-slate-900/60"></div>
+      </div>
+      
+      {/* Overlay com efeito glassmorphism/blur para melhorar legibilidade */}
+      <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-sm"></div>
+
       <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center gap-12 relative z-10">
         
         <motion.div 
@@ -39,54 +45,63 @@ const Hero = () => {
           transition={{ duration: 0.8 }}
           className="flex-1"
         >
-          {/* Cor alterada para text-slate-900 (light) e text-white (dark) */}
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 dark:text-white leading-tight transition-colors duration-500">
-            {content.title_part1} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-600">
-              {content.title_highlight}
-            </span>
-          </h1>
-          
-          {/* Cor do parágrafo ajustada para contraste em ambos os modos */}
-          <p className="mt-8 text-xl text-slate-600 dark:text-gray-400 max-w-lg transition-colors duration-500">
-            {content.description}
-          </p>
-
-          <div className="mt-10 flex gap-4">
-            <motion.a 
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05, boxShadow: "0px 0px 30px rgba(59,130,246,0.4)" }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-full font-bold shadow-lg transition-all text-lg"
-            >
-              {content.button_text}
-            </motion.a>
+          {/* Container do texto com fundo semi-transparente para melhor contraste */}
+          <div className="bg-white/20 dark:bg-black/30 backdrop-blur-md rounded-3xl p-8 md:p-10 border border-white/30 dark:border-white/10">
+            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
+              {content.title_part1} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-100">
+                {content.title_highlight}
+              </span>
+            </h1>
             
-            <a 
-              href="#contacto"
-              className="bg-transparent border-2 border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-8 py-5 rounded-full font-bold transition-all"
-            >
-              Saber Mais
-            </a>
+            <p className="mt-8 text-xl text-blue-50 dark:text-blue-100 max-w-lg">
+              {content.description}
+            </p>
+
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <motion.a 
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05, boxShadow: "0px 0px 30px rgba(59,130,246,0.6)" }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-full font-bold shadow-lg transition-all text-lg text-center"
+              >
+                {content.button_text}
+              </motion.a>
+              
+              <a 
+                href="#contacto"
+                className="bg-white/20 hover:bg-white/30 dark:bg-black/30 dark:hover:bg-black/40 border-2 border-white text-white px-8 py-5 rounded-full font-bold transition-all text-center backdrop-blur-sm"
+              >
+                Saber Mais
+              </a>
+            </div>
           </div>
         </motion.div>
 
-        {/* LOGO SVG com filtro inteligente */}
+        {/* LOGO com efeito borrado igual ao About.tsx */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.5, rotate: -5 }}
           animate={{ opacity: 1, scale: 1, rotate: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="flex-1 flex justify-center"
+          className="flex-1 flex justify-center relative"
         >
+          {/* Efeito blur igual ao About.tsx - APENAS AQUI */}
+          <div className="absolute inset-0 bg-blue-600/10 dark:bg-blue-600/20 blur-[100px] rounded-full transition-colors duration-500"></div>
+          
+          {/* Logo limpo e simples */}
           <img 
             src={logoMv} 
             alt="Mil Vendas" 
-            className="w-72 h-72 md:w-[500px] md:h-[500px] object-contain filter drop-shadow-[0_0_40px_rgba(59,130,246,0.2)] brightness-0 dark:invert transition-all duration-500"
+            className="relative z-10 w-72 h-72 md:w-[500px] md:h-[500px] object-contain filter drop-shadow-[0_0_40px_rgba(59,130,246,0.2)] brightness-0 dark:invert transition-all duration-500"
           />
         </motion.div>
       </div>
+
+      {/* Elementos decorativos no fundo (opcional) */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
     </section>
   );
 };
