@@ -1,4 +1,4 @@
-// src/config/paths.js
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
