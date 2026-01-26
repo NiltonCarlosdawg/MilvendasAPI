@@ -1,4 +1,4 @@
-// src/config/multer-events.js
+
 import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';

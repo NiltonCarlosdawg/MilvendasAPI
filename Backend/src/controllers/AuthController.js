@@ -99,20 +99,17 @@ export const register = async (req, res) => {
         name: name.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
-        role: role || 'admin' // ✅ Usar role fornecido ou 'admin' como padrão
+        role: role || 'admin' //Usar role fornecido ou 'admin' como padrão
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true
-        // Senha NUNCA é retornada
+       
       }
     });
 
-    // ========================================
-    // GERAR TOKEN JWT AUTOMATICAMENTE
-    // ========================================
     const token = jwt.sign(
       { 
         id: user.id,
@@ -126,7 +123,7 @@ export const register = async (req, res) => {
     // ========================================
     // LOG DE AUDITORIA
     // ========================================
-    console.log(`✅ Novo usuário registrado: ${user.email} (${user.role})`);
+    console.log(` Novo usuário registrado: ${user.email} (${user.role})`);
 
     // ========================================
     // RESPOSTA DE SUCESSO
@@ -139,12 +136,12 @@ export const register = async (req, res) => {
         email: user.email,
         role: user.role
       },
-      token, // ✅ Retornar token para login automático
+      token, //  Retornar token para login automático
       expiresIn: '7d'
     });
 
   } catch (error) {
-    console.error('❌ Erro ao registrar usuário:', error);
+    console.error('Erro ao registrar usuário:', error);
     
     // Tratar erros específicos do Prisma
     if (error.code === 'P2002') {
@@ -163,16 +160,10 @@ export const register = async (req, res) => {
   }
 };
 
-// ========================================
-// LOGIN DE USUÁRIO
-// ========================================
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ========================================
-    // VALIDAÇÕES DE INPUT
-    // ========================================
     if (!email || !password) {
       return res.status(400).json({ 
         error: "Credenciais incompletas",
@@ -189,24 +180,18 @@ export const login = async (req, res) => {
       });
     }
 
-    // ========================================
-    // BUSCAR USUÁRIO NO BANCO
-    // ========================================
+
     const user = await prisma.user.findUnique({ 
       where: { email: email.toLowerCase().trim() }
     });
 
     if (!user) {
-      // ✅ Mensagem genérica para não expor se o email existe
+      // Mensagem genérica para não expor se o email existe
       return res.status(401).json({ 
         error: "Credenciais inválidas",
         message: "Email ou senha incorretos"
       });
     }
-
-    // ========================================
-    // VALIDAR SENHA
-    // ========================================
     const validPassword = await bcrypt.compare(password, user.password);
     
     if (!validPassword) {
@@ -218,10 +203,6 @@ export const login = async (req, res) => {
         message: "Email ou senha incorretos"
       });
     }
-
-    // ========================================
-    // GERAR TOKEN JWT
-    // ========================================
     const token = jwt.sign(
       { 
         id: user.id,
@@ -232,14 +213,8 @@ export const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // ========================================
-    // LOG DE AUDITORIA
-    // ========================================
     console.log(`✅ Login bem-sucedido: ${user.email} (${user.role})`);
 
-    // ========================================
-    // RESPOSTA DE SUCESSO
-    // ========================================
     res.json({ 
       message: "Login realizado com sucesso",
       token,
@@ -253,7 +228,7 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Erro ao fazer login:', error);
+    console.error(' Erro ao fazer login:', error);
     
     res.status(500).json({ 
       error: "Erro ao fazer login",
@@ -265,7 +240,7 @@ export const login = async (req, res) => {
 };
 
 // ========================================
-// REFRESH TOKEN (OPCIONAL - RECOMENDADO)
+// REFRESH TOKEN (OPCIONAL)
 // ========================================
 export const refreshToken = async (req, res) => {
   try {
@@ -334,7 +309,7 @@ export const refreshToken = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Erro ao renovar token:', error);
+    console.error(' Erro ao renovar token:', error);
     res.status(500).json({ 
       error: "Erro ao renovar token" 
     });
@@ -385,7 +360,7 @@ export const verifyToken = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Erro ao verificar token:', error);
+    console.error(' Erro ao verificar token:', error);
     res.status(500).json({ 
       valid: false,
       error: "Erro ao verificar token" 
@@ -398,20 +373,15 @@ export const verifyToken = async (req, res) => {
 // ========================================
 export const logout = async (req, res) => {
   try {
-    // Em um sistema JWT stateless, o logout é feito no cliente
-    // removendo o token do localStorage/cookies
     
-    // Aqui você pode adicionar lógica para blacklist de tokens
-    // ou registrar o logout em um log de auditoria
-    
-    console.log(`👋 Logout realizado para usuário ID: ${req.userId}`);
+    console.log(` Logout realizado para usuário ID: ${req.userId}`);
     
     res.json({ 
       message: "Logout realizado com sucesso" 
     });
 
   } catch (error) {
-    console.error('❌ Erro ao fazer logout:', error);
+    console.error(' Erro ao fazer logout:', error);
     res.status(500).json({ 
       error: "Erro ao fazer logout" 
     });

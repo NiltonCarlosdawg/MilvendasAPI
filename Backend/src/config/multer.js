@@ -1,4 +1,4 @@
-// src/config/multer.js
+
 import multer from 'multer';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -11,7 +11,7 @@ const uploadDir = paths.UPLOAD_ROOT;
 // Cria a pasta se não existir (executa no carregamento do módulo)
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-  console.log(`📁 Pasta de upload criada automaticamente: ${uploadDir}`);
+  console.log(` Pasta de upload criada automaticamente: ${uploadDir}`);
 }
 
 const storage = multer.diskStorage({
@@ -37,8 +37,8 @@ const fileFilter = (req, file, cb) => {
     'image/jpg',
     'image/png',
     'image/webp',
-    'image/gif'
-    // 'video/mp4',  // descomente se quiser permitir vídeos no portfólio geral
+    'image/gif',
+    'video/mp4'
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
