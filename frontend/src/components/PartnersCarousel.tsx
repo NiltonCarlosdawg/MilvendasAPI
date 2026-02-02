@@ -15,7 +15,7 @@ const PartnersCarousel: React.FC = () => {
       logo: '/partners/angonet.jpeg',
       alt: 'Angonet - Parceiro tecnológico',
       type: 'Parceiro',
-      description: 'Líder em soluções tecnológicas',
+      description: '',
       years: '6+ meses'
     },
     {
@@ -24,7 +24,7 @@ const PartnersCarousel: React.FC = () => {
       logo: '/partners/huambo.jpeg',
       alt: 'Governo Provincial do Huambo',
       type: 'Parceiro',
-      description: 'Parceria para desenvolvimento regional',
+      description: '',
       years: '6+ meses'
     },
     {
@@ -33,7 +33,7 @@ const PartnersCarousel: React.FC = () => {
       logo: '/partners/icb urbe.jpeg',
       alt: 'ICB-URBE',
       type: 'Parceiro',
-      description: 'Inovação e pesquisa aplicada',
+      description: '',
       years: '6+ meses'
     },
     {
@@ -42,7 +42,7 @@ const PartnersCarousel: React.FC = () => {
       logo: '/partners/access.jpeg',
       alt: 'Banco ACCESS',
       type: 'Parceiro',
-      description: 'Soluções financeiras integradas',
+      description: '',
       years: '6+ meses'
     },
     {
@@ -92,7 +92,7 @@ const PartnersCarousel: React.FC = () => {
 
     const interval = setInterval(() => {
       nextSlide();
-    }, 5000); // 5 segundos
+    }, 3000); // 3 segundos que eu Melqui coloqueiiiiiiiiiii
 
     return () => clearInterval(interval);
   }, [currentIndex, isPaused, totalPages]);
@@ -350,7 +350,7 @@ const PartnersCarousel: React.FC = () => {
           >
             <p className="text-sm text-slate-500 dark:text-gray-400 inline-flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-full border border-slate-200/50 dark:border-slate-700/50">
               <span className="flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+               
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
               </span>
               Passe o mouse para pausar • Clique ou arraste para navegar
