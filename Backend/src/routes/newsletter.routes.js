@@ -40,9 +40,6 @@ const upload = multer({
   }
 });
 
-// ========================================
-// ROTAS PÚBLICAS
-// ========================================
 
 // Inscrição via rodapé - com rate limiting
 router.post('/subscribe', newsletterSubscribeLimiter, subscribe);

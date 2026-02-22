@@ -7,7 +7,7 @@ const router = Router();
 // Listar configurações - Público (mas controller deve filtrar sensíveis!)
 router.get('/', getSettings);
 
-// Atualizar configuração - Apenas Admin
+
 router.post(
   '/', 
   authMiddleware, 

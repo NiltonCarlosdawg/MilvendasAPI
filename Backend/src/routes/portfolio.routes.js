@@ -13,11 +13,7 @@ import { authMiddleware, requireAdmin } from '../middlewares/auth.js';
 
 const router = Router();
 
-/**
- * Prefixo da Rota: /api/v1/portfolio
- */
 
-// Rotas Públicas (apenas itens publicados)
 router.get('/', getPortfolio);                                      
 
 // Rota Pública: Buscar item por ID (controller deve verificar se está publicado)

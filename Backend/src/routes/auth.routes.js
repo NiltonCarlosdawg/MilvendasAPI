@@ -4,7 +4,6 @@ import { authLimiter, registerLimiter } from '../middlewares/rateLimit.js';
 
 const router = Router();
 
-// Prefixo esperado: /api/v1/auth
 
 router.post('/register', registerLimiter, register);
 router.post('/login', authLimiter, login);

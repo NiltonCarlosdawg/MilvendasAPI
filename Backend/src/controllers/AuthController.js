@@ -4,21 +4,19 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// ========================================
-// ✅ VALIDAÇÃO OBRIGATÓRIA DO JWT_SECRET
-// ========================================
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
   throw new Error(
-    '❌ ERRO CRÍTICO: JWT_SECRET não está definido no arquivo .env\n' +
+    ' ERRO CRÍTICO: JWT_SECRET não está definido no arquivo .env\n' +
     'Adicione a variável JWT_SECRET no arquivo .env com pelo menos 32 caracteres.'
   );
 }
 
 if (JWT_SECRET.length < 32) {
   console.warn(
-    '⚠️  AVISO DE SEGURANÇA: JWT_SECRET deve ter pelo menos 32 caracteres.\n' +
+    '  AVISO DE SEGURANÇA: JWT_SECRET deve ter pelo menos 32 caracteres.\n' +
     'Recomendamos usar uma chave mais longa para maior segurança.'
   );
 }
@@ -99,7 +97,7 @@ export const register = async (req, res) => {
         name: name.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
-        role: role || 'admin' //Usar role fornecido ou 'admin' como padrão
+        role: role || 'admin' 
       },
       select: {
         id: true,
@@ -117,7 +115,7 @@ export const register = async (req, res) => {
         role: user.role
       }, 
       JWT_SECRET, 
-      { expiresIn: '7d' } // Token válido por 7 dias
+      { expiresIn: '7d' } 
     );
 
     // ========================================

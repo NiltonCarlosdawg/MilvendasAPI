@@ -5,7 +5,7 @@ import { apiLimiter } from '../middlewares/rateLimit.js';
 
 const router = Router();
 
-// Endpoint: GET /api/v1/users/me
+
 router.get(
   '/me', 
   authMiddleware, 
