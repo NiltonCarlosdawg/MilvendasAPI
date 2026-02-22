@@ -7,17 +7,17 @@ import {
     unsubscribe, 
     getAllSubscribers 
 } from '../controllers/NewsletterController.js';
-import { authMiddleware } from '../middlewares/auth.js';
+import { authMiddleware, requireAdmin } from '../middlewares/auth.js';
+import { newsletterSubscribeLimiter, uploadLimiter } from '../middlewares/rateLimit.js';
 
 const router = Router();
 
 // ========================================
 // CONFIGURAÇÃO DO MULTER PARA IMAGENS
 // ========================================
-// Reutiliza a lógica de armazenamento para salvar imagens locais da newsletter
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Garanta que a pasta 'uploads' existe na raiz
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -27,6 +27,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
+  limits: { 
+    fileSize: 5 * 1024 * 1024, // 🔒 Limite: 5MB
+    files: 1 
+  },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -37,36 +41,65 @@ const upload = multer({
 });
 
 // ========================================
-// ROTAS PÚBLICAS (Acessíveis pelo site)
+// ROTAS PÚBLICAS
 // ========================================
 
-// Inscrição via rodapé
-router.post('/subscribe', subscribe);
+// Inscrição via rodapé - com rate limiting
+router.post('/subscribe', newsletterSubscribeLimiter, subscribe);
 
 // Cancelar inscrição via link de e-mail
 router.get('/unsubscribe', unsubscribe);
 
-
 // ========================================
-// ROTAS PRIVADAS (Apenas SuperAdmin)
+// ROTAS ADMIN (Protegidas + Apenas Admin)
 // ========================================
 
-// Listar todos os inscritos (para a tabela do React Admin)
-router.get('/', authMiddleware, getAllSubscribers);
+// Listar todos os inscritos 
+router.get(
+  '/', 
+  authMiddleware, 
+  requireAdmin, 
+  getAllSubscribers
+);
 
-// Enviar newsletter em massa usando os templates
-router.post('/broadcast', authMiddleware, sendBroadcast);
+// Enviar newsletter em massa 
+router.post(
+  '/broadcast', 
+  authMiddleware, 
+  requireAdmin, 
+  sendBroadcast
+);
 
-// ROTA DE UPLOAD: Transforma ficheiro local numa URL pública para o e-mail
-router.post('/upload-image', authMiddleware, upload.single('file'), (req, res) => {
-  // Verifique se está em produção ou desenvolvimento
-  const domain = process.env.NODE_ENV === 'production' 
-    ? 'https://milvendasapi.onrender.com' // O seu domínio real
-    : `${req.protocol}://${req.get('host')}`; // localhost em dev
+// Upload de imagem - Apenas admin + rate limit
+router.post(
+  '/upload-image', 
+  authMiddleware, 
+  requireAdmin, 
+  uploadLimiter,
+  upload.single('file'), 
+  (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+      }
 
-  const imageUrl = `${domain}/uploads/${req.file.filename}`;
-  
-  res.json({ url: imageUrl });
-});
+      const domain = process.env.NODE_ENV === 'production' 
+        ? process.env.API_URL || 'https://api.milvendas.ao'
+        : `${req.protocol}://${req.get('host')}`;
+
+      const imageUrl = `${domain}/uploads/${req.file.filename}`;
+      
+      res.json({ 
+        success: true,
+        url: imageUrl,
+        filename: req.file.filename,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      res.status(500).json({ error: 'Erro ao processar upload' });
+    }
+  }
+);
 
 export default router;

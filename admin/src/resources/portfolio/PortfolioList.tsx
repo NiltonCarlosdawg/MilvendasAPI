@@ -19,7 +19,7 @@ const PortfolioMediaField = ({ _label }: { label?: string }) => {
   if (!record?.mediaUrl) return <span>Sem mídia</span>;
 
   const isVideo = record.mediaType?.toLowerCase() === 'video';
-  const url = `http://localhost:3001/uploads/${record.mediaUrl}`;
+  const url = `http://https://api.milvendas.ao/uploads/${record.mediaUrl}`;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>

@@ -18,7 +18,7 @@ const CurrentMediaPreview = () => {
     <div style={{ margin: '1rem 0' }}>
       <p style={{ fontSize: '0.8rem', color: '#666' }}>Mídia atual:</p>
       <img
-        src={`http://localhost:3001/uploads/${record.mediaUrl}`}
+        src={`https://https://api.milvendas.ao/uploads/${record.mediaUrl}`}
         alt="Preview"
         style={{ maxWidth: '200px', borderRadius: '8px', border: '1px solid #ddd' }}
       />

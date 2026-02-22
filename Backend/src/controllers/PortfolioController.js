@@ -25,9 +25,17 @@ export const getPortfolioById = async (req, res) => {
   try {
     const { id } = req.params;
     const item = await portfolioService.getItemById(id);
+    
     if (!item) {
       return res.status(404).json({ error: "Item não encontrado" });
     }
+
+    // Se não estiver autenticado como admin, verifica se está publicado
+    const isAdmin = req.user?.role === 'admin';
+    if (!isAdmin && item.status !== 'PUBLISHED') {
+      return res.status(404).json({ error: "Item não encontrado" });
+    }
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });

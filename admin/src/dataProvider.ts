@@ -1,5 +1,5 @@
 
-const baseUrl = 'https://milvendasapi.onrender.com/api/v1';
+const baseUrl = 'https://api.milvendas.ao/api/v1';
 
 /**
  * Helper para injetar o Token em requisições JSON ou FormData

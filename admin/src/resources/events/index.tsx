@@ -17,7 +17,7 @@ const CoverImageField = () => {
   const cover = record?.media?.[0]?.url; 
   return cover ? (
     <img
-      src={`https://milvendasapi.onrender.com/uploads/events/${cover}`}
+      src={`https://api.milvendas.ao/uploads/events/${cover}`}
       alt="Capa"
       style={{ maxWidth: '80px', borderRadius: '4px' }}
     />

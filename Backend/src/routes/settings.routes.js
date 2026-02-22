@@ -1,13 +1,26 @@
 import { Router } from 'express';
 import { updateSetting, getSettings, deleteSetting } from '../controllers/SettingsController.js';
-import { authMiddleware } from '../middlewares/auth.js';
+import { authMiddleware, requireAdmin } from '../middlewares/auth.js';
 
 const router = Router();
 
-// Prefixo esperado: /api/v1/settings
+// Listar configurações - Público (mas controller deve filtrar sensíveis!)
+router.get('/', getSettings);
 
-router.get('/', getSettings);                        // GET /api/v1/settings
-router.post('/', authMiddleware, updateSetting);     // POST /api/v1/settings
-router.delete('/:key', authMiddleware, deleteSetting); // DELETE /api/v1/settings/:key
+// Atualizar configuração - Apenas Admin
+router.post(
+  '/', 
+  authMiddleware, 
+  requireAdmin, 
+  updateSetting
+);
+
+// Deletar configuração - Apenas Admin
+router.delete(
+  '/:key', 
+  authMiddleware, 
+  requireAdmin, 
+  deleteSetting
+);
 
 export default router;

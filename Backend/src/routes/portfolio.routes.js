@@ -1,14 +1,15 @@
 // src/routes/portfolio.routes.js
 import { Router } from 'express';
 import { upload } from '../config/multer.js';
+import { uploadLimiter } from '../middlewares/rateLimit.js';
 import { 
   createItem, 
   getPortfolio, 
-  getPortfolioById, // Importa a função de busca por ID
+  getPortfolioById,
   updateItem, 
   deleteItem 
 } from '../controllers/PortfolioController.js';
-import { authMiddleware } from '../middlewares/auth.js';
+import { authMiddleware, requireAdmin } from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -16,15 +17,37 @@ const router = Router();
  * Prefixo da Rota: /api/v1/portfolio
  */
 
-// Rota Pública: Listar todos
+// Rotas Públicas (apenas itens publicados)
 router.get('/', getPortfolio);                                      
 
-// Rota de Admin/Edição: Buscar um item específico por ID (CORRIGE O ERRO 404 NO EDIT)
+// Rota Pública: Buscar item por ID (controller deve verificar se está publicado)
+// Se o portfólio não tiver status "published", o controller deve retornar 404
 router.get('/:id', getPortfolioById);                               
 
-// Rotas Protegidas (Criação, Atualização e Eliminação)
-router.post('/', authMiddleware, upload.single('file'), createItem); 
-router.put('/:id', authMiddleware, upload.single('file'), updateItem); 
-router.delete('/:id', authMiddleware, deleteItem);                   
+// Rotas Protegidas - Apenas Admin
+router.post(
+  '/', 
+  authMiddleware, 
+  requireAdmin, 
+  uploadLimiter,
+  upload.single('file'), 
+  createItem
+); 
+
+router.put(
+  '/:id', 
+  authMiddleware, 
+  requireAdmin, 
+  uploadLimiter,
+  upload.single('file'), 
+  updateItem
+); 
+
+router.delete(
+  '/:id', 
+  authMiddleware, 
+  requireAdmin, 
+  deleteItem
+);                   
 
 export default router;
