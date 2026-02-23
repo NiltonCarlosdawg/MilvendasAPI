@@ -41,7 +41,7 @@ export const getEvents = async (req, res) => {
         }
       }
     });
-
+ 
     res.setHeader('Content-Range', `events ${skip}-${skip + events.length - 1}/${total}`);
     res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
     res.json(events);

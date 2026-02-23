@@ -212,7 +212,7 @@ const Navbar = () => {
                 
                 <div className="space-y-2">
                   <p className="text-sm text-slate-600 dark:text-gray-400">
-                    Sua agência tecnológica em Luanda
+                    Sua empresa tecnológica em Luanda
                   </p>
                 </div>
               </div>
