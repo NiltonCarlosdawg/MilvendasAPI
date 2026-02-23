@@ -120,10 +120,10 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, onClose, i
 
                 {event.capacity && (
                   <div className="flex items-center gap-3">
-                    <Users className="text-blue-500" size={20} />
-                    <p className="text-sm text-slate-500">
+                   {/* <Users className="text-blue-500" size={20} /> */}
+                    {/*<p className="text-sm text-slate-500">
                       Capacidade: <span className="font-bold dark:text-white">{event.capacity} pessoas</span>
-                    </p>
+                    </p>*/}
                   </div>
                 )}
               </div>

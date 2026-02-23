@@ -240,7 +240,7 @@ const Events = () => {
                         {/* Indicador de capacidade */}
                         {event.capacity && (
                           <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold">
-                            <Users size={12} /> {event.capacity} lugares
+                            {/*<Users size={12} />*/} {/*{event.capacity}*/} {/*lugares*/}
                           </div>
                         )}
 
@@ -311,15 +311,15 @@ const Events = () => {
                         )}
 
                         {/* Link para WhatsApp */}
-                        <a 
+                        {/*<a 
                           href={`https://wa.me/244922965959?text=Olá! Gostaria de mais informações sobre o evento: ${event.title}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="p-4 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 hover:text-green-500 hover:border-green-500 transition-all"
                         >
-                          <Phone size={20} />
-                        </a>
+                         <Phone size={20} />
+                        </a>*/}
                       </div>
                     </div>
                   </div>
