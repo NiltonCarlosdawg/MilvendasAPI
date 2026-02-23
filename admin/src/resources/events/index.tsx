@@ -1,27 +1,24 @@
 import {
-  List,
-  Datagrid,
-  TextField,
-  DateField,
-  EditButton,
-  DeleteButton,
-  useRecordContext,
+  List, Datagrid, TextField, DateField,
+  EditButton, DeleteButton, useRecordContext,
 } from 'react-admin';
+import { ENDPOINTS } from '../../api/endpoints';
 
-// Clean Code: Centralizando exportações de arquivos externos
-export { default as EventCreate } from './EventCreate';
 export { EventEdit } from './EventEdit';
+export { default as EventCreate } from './EventCreate';
 
-const CoverImageField = () => {
+const CoverImageField = (_props: { label?: string }) => {
   const record = useRecordContext();
-  const cover = record?.media?.[0]?.url; 
+  const cover = record?.media?.[0]?.url as string | undefined;
   return cover ? (
     <img
-      src={`https://api.milvendas.ao/uploads/events/${cover}`}
+      src={`${ENDPOINTS.events}/uploads/${cover}`}
       alt="Capa"
       style={{ maxWidth: '80px', borderRadius: '4px' }}
     />
-  ) : <span style={{ color: '#999' }}>Sem capa</span>;
+  ) : (
+    <span style={{ color: '#999' }}>Sem capa</span>
+  );
 };
 
 export const EventList = () => (

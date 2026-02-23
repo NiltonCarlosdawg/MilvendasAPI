@@ -1,46 +1,32 @@
-import { 
-  List, 
-  Datagrid, 
-  TextField, 
-  DateField, 
-  EditButton, 
-  DeleteButton, 
-  useRecordContext,
-  FunctionField,
-  WrapperField
+// src/resources/portfolio/PortfolioList.tsx
+import {
+  List, Datagrid, TextField, DateField,
+  EditButton, DeleteButton, useRecordContext,
+  FunctionField, WrapperField,
 } from 'react-admin';
+import { ENDPOINTS } from '../../api/endpoints';
 
-/**
- * Componente para exibir a miniatura da mídia.
- * Suporta imagens e exibe um ícone/texto para vídeos.
- */
-const PortfolioMediaField = ({ _label }: { label?: string }) => {
+const PortfolioMediaField = (_props: { label?: string }) => {
   const record = useRecordContext();
   if (!record?.mediaUrl) return <span>Sem mídia</span>;
 
-  const isVideo = record.mediaType?.toLowerCase() === 'video';
-  const url = `http://https://api.milvendas.ao/uploads/${record.mediaUrl}`;
+  const isVideo = (record.mediaType as string)?.toLowerCase() === 'video';
+  const url = `${ENDPOINTS.portfolio}/uploads/${record.mediaUrl}`;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       {isVideo ? (
-        <div style={{ 
-          width: '80px', 
-          height: '50px', 
-          backgroundColor: '#000', 
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '10px',
-          borderRadius: '4px'
+        <div style={{
+          width: '80px', height: '50px', backgroundColor: '#000', color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '10px', borderRadius: '4px',
         }}>
           VÍDEO
         </div>
       ) : (
         <img
           src={url}
-          alt={record.title}
+          alt={record.title as string}
           style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
         />
       )}
@@ -49,27 +35,12 @@ const PortfolioMediaField = ({ _label }: { label?: string }) => {
 };
 
 export const PortfolioList = () => (
-  <List 
-    sort={{ field: 'createdAt', order: 'DESC' }}
-    perPage={10} // Define explicitamente para bater com o Range do backend
-  >
+  <List sort={{ field: 'createdAt', order: 'DESC' }} perPage={10}>
     <Datagrid rowClick="edit">
       <PortfolioMediaField label="Mídia" />
-      
       <TextField source="title" label="Título" />
-      
-      <FunctionField
-        label="Tipo"
-        render={(record: any) => record.mediaType?.toUpperCase()}
-      />
-
-      <DateField 
-        source="createdAt" 
-        label="Criado em" 
-        locales="pt-BR" 
-        showTime={false}
-      />
-      
+      <FunctionField label="Tipo" render={(record: Record<string, unknown>) => (record.mediaType as string)?.toUpperCase()} />
+      <DateField source="createdAt" label="Criado em" locales="pt-BR" showTime={false} />
       <WrapperField label="Ações" textAlign="right">
         <EditButton />
         <DeleteButton mutationMode="pessimistic" />

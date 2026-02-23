@@ -1,21 +1,32 @@
+// src/authProvider.ts
 import type { AuthProvider } from 'react-admin';
+import { BASE_URL, PATHS } from './api/endpoints';
+
+interface LoginResponse {
+  token: string;
+  user: { id: string; name: string; email: string };
+}
+
 const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
-    const request = new Request('https://api.milvendas.ao/api/v1/auth/login', {
+    const response = await fetch(`${BASE_URL}${PATHS.auth}/login`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: username, password }),
-      headers: new Headers({ 'Content-Type': 'application/json' }),
     });
+    const json = await response.json().catch(() => ({})) as LoginResponse;
+    if (!response.ok) throw new Error(json?.message || json?.error || 'Credenciais inválidas');
 
-    const response = await fetch(request);
-    if (response.status < 200 || response.status >= 300) {
-      throw new Error('Credenciais inválidas');
-    }
+    // DEBUG — remove depois de confirmar a estrutura da resposta
+    console.log('[authProvider] login response:', json);
 
-    const { token, user } = await response.json();
+    const token = json?.token ?? json?.accessToken ?? json?.data?.token ?? json?.data?.accessToken;
+    const user  = json?.user  ?? json?.data?.user;
+
+    if (!token) throw new Error('Token não encontrado na resposta da API');
+
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
-    return Promise.resolve();
   },
 
   logout: () => {
@@ -24,13 +35,13 @@ const authProvider: AuthProvider = {
     return Promise.resolve();
   },
 
-  checkAuth: () => {
-    return localStorage.getItem('token') ? Promise.resolve() : Promise.reject();
-  },
+  checkAuth: () =>
+    localStorage.getItem('token') ? Promise.resolve() : Promise.reject(),
 
-  checkError: ({ status }) => {
-    if (status === 401 || status === 403) {
+  checkError: (error: any) => {
+    if (error?.status === 401 || error?.status === 403) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       return Promise.reject();
     }
     return Promise.resolve();
@@ -38,14 +49,16 @@ const authProvider: AuthProvider = {
 
   getIdentity: () => {
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      return Promise.resolve({ id: user.id, fullName: user.name, avatar: '' });
-    } catch (error) {
+      const raw = localStorage.getItem('user');
+      if (!raw) return Promise.reject();
+      const user = JSON.parse(raw) as { id: string; name: string };
+      return Promise.resolve({ id: user.id, fullName: user.name, avatar: undefined });
+    } catch {
       return Promise.reject();
     }
   },
 
-  getPermissions: () => Promise.resolve(),
+  getPermissions: () => Promise.resolve(null),
 };
 
 export default authProvider;

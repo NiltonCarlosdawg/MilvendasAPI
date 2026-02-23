@@ -1,123 +1,80 @@
+// src/dataProvider.ts
+import type { DataProvider, RaRecord, Identifier } from 'react-admin';
+import { PATHS, apiClient } from './api/endpoints';
 
-const baseUrl = 'https://api.milvendas.ao/api/v1';
+const normalizeId = (item: Record<string, unknown>): RaRecord => ({
+  ...item,
+  id: (item.id ?? item._id) as Identifier,
+});
 
-/**
- * Helper para injetar o Token em requisições JSON ou FormData
- */
-const httpClient = async (url: string, options: any = {}) => {
-  const token = localStorage.getItem('token');
-  const headers = new Headers(options.headers || {});
-  
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
+const FORM_DATA_RESOURCES = new Set(['portfolio']);
 
-  // Se o corpo não for FormData, definimos como JSON
-  if (options.body && !(options.body instanceof FormData)) {
-    headers.set('Content-Type', 'application/json');
-  }
-
-  const response = await fetch(url, { ...options, headers });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `Erro HTTP ${response.status}`);
-  }
-
-  // Se o método for DELETE e não houver corpo, retornamos vazio
-  if (response.status === 204) return { json: {} };
-  
-  return { json: await response.json() };
-};
-
-const dataProvider = {
-  // GET LIST: Resolve o erro de Content-Range ignorando-o e usando o tamanho do array
-  getList: async (resource: string, params: any) => {
-    const { json } = await httpClient(`${baseUrl}/${resource}`);
-    
-    // Garantimos que cada item tem um 'id' (essencial para React Admin)
-    const data = json.map((item: any) => ({
-      ...item,
-      id: item.id || item._id,
-    }));
-
-    return {
-      data,
-      total: data.length, // O React Admin usa isto para paginação interna
-    };
-  },
-
-  getOne: async (resource: string, params: any) => {
-    const { json } = await httpClient(`${baseUrl}/${resource}/${params.id}`);
-    return { data: { ...json, id: json.id || json._id } };
-  },
-
-  create: async (resource: string, params: any) => {
-    let body: any;
-    let url = `${baseUrl}/${resource}`;
-
-    if (resource === 'portfolio') {
-      body = new FormData();
-      Object.keys(params.data).forEach(key => {
-        if (key === 'file') {
-          if (params.data.file?.rawFile) body.append('file', params.data.file.rawFile);
-        } else {
-          body.append(key, params.data[key]);
-        }
-      });
-    } else if (resource === 'events') {
-      url = `${baseUrl}/events`;
-      body = JSON.stringify(params.data);
-    } else {
-      body = JSON.stringify(params.data);
+function toFormData(data: Record<string, unknown>): FormData {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(data)) {
+    if (key === 'id') continue;
+    if (key === 'file') {
+      const f = value as { rawFile?: File } | null;
+      if (f?.rawFile) form.append('file', f.rawFile);
+    } else if (value !== null && value !== undefined) {
+      form.append(key, String(value));
     }
+  }
+  return form;
+}
 
-    const { json } = await httpClient(url, { method: 'POST', body });
-    return { data: { ...json, id: json.id || json._id } };
+const dataProvider: DataProvider = {
+  getList: async (resource) => {
+    const json = await apiClient<Record<string, unknown>[]>(PATHS[resource as keyof typeof PATHS]);
+    const data = json.map(normalizeId);
+    return { data: data as any, total: data.length };
   },
 
-  update: async (resource: string, params: any) => {
-    let body: any;
-    let url = `${baseUrl}/${resource}/${params.id}`;
-
-    if (resource === 'portfolio') {
-      body = new FormData();
-      Object.keys(params.data).forEach(key => {
-        if (key === 'file') {
-          if (params.data.file?.rawFile) body.append('file', params.data.file.rawFile);
-        } else if (key !== 'id') {
-          body.append(key, params.data[key]);
-        }
-      });
-    } else if (resource === 'events') {
-      url = `${baseUrl}/events/${params.id}`;
-      body = JSON.stringify(params.data);
-    } else {
-      body = JSON.stringify(params.data);
-    }
-
-    const { json } = await httpClient(url, { method: 'PUT', body });
-    return { data: { ...json, id: json.id || json._id } };
+  getOne: async (resource, { id }) => {
+    const json = await apiClient<Record<string, unknown>>(`${PATHS[resource as keyof typeof PATHS]}/${id}`);
+    return { data: normalizeId(json) as any };
   },
 
-  delete: async (resource: string, params: any) => {
-    const url = resource === 'events' 
-      ? `${baseUrl}/events/${params.id}` 
-      : `${baseUrl}/${resource}/${params.id}`;
-
-    await httpClient(url, { method: 'DELETE' });
-    return { data: { id: params.id } };
+  create: async (resource, { data }) => {
+    const isForm = FORM_DATA_RESOURCES.has(resource);
+    const body = isForm ? toFormData(data) : data;
+    const json = await apiClient<Record<string, unknown>>(PATHS[resource as keyof typeof PATHS], { method: 'POST', body, isFormData: isForm });
+    return { data: normalizeId(json) as any };
   },
 
-  // Métodos adicionais necessários para evitar erros de undefined
-  getMany: async (resource: string, params: any) => {
-    const { json } = await httpClient(`${baseUrl}/${resource}`);
-    return { data: json.filter((item: any) => params.ids.includes(item.id || item._id)) };
+  update: async (resource, { id, data }) => {
+    const isForm = FORM_DATA_RESOURCES.has(resource);
+    const body = isForm ? toFormData(data) : data;
+    const json = await apiClient<Record<string, unknown>>(`${PATHS[resource as keyof typeof PATHS]}/${id}`, { method: 'PUT', body, isFormData: isForm });
+    return { data: normalizeId(json) as any };
   },
 
-  getManyReference: async (resource: string, params: any) => {
-    const { json } = await httpClient(`${baseUrl}/${resource}`);
-    return { data: json, total: json.length };
+  delete: async (resource, { id }) => {
+    await apiClient<void>(`${PATHS[resource as keyof typeof PATHS]}/${id}`, { method: 'DELETE' });
+    return { data: { id } as any };
+  },
+
+  deleteMany: async (resource, { ids }) => {
+    await Promise.all(ids.map((id) => apiClient<void>(`${PATHS[resource as keyof typeof PATHS]}/${id}`, { method: 'DELETE' })));
+    return { data: ids };
+  },
+
+  getMany: async (resource, { ids }) => {
+    const json = await apiClient<Record<string, unknown>[]>(PATHS[resource as keyof typeof PATHS]);
+    const idSet = new Set(ids.map(String));
+    const data = json.map(normalizeId).filter((item) => idSet.has(String(item.id)));
+    return { data: data as any };
+  },
+
+  getManyReference: async (resource) => {
+    const json = await apiClient<Record<string, unknown>[]>(PATHS[resource as keyof typeof PATHS]);
+    const data = json.map(normalizeId);
+    return { data: data as any, total: data.length };
+  },
+
+  updateMany: async (resource, { ids, data }) => {
+    await Promise.all(ids.map((id) => apiClient<void>(`${PATHS[resource as keyof typeof PATHS]}/${id}`, { method: 'PUT', body: data })));
+    return { data: ids };
   },
 };
 

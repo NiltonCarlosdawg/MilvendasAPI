@@ -1,5 +1,10 @@
-import { Create, SimpleForm, TextInput, DateInput, SelectInput, NumberInput, BooleanInput, ImageInput, ImageField } from 'react-admin';
+// src/resources/events/EventCreate.tsx
+import {
+  Create, SimpleForm, TextInput, DateInput, SelectInput,
+  NumberInput, BooleanInput, ImageInput, ImageField,
+} from 'react-admin';
 import { RichTextInput } from 'ra-input-rich-text';
+
 const EventCreate = () => (
   <Create>
     <SimpleForm>
@@ -33,12 +38,10 @@ const EventCreate = () => (
         ]}
         defaultValue="DRAFT"
       />
-
-      {/* Upload de capa */}
       <ImageInput
         source="coverImage"
         label="Imagem de Capa"
-        accept="image/*"
+        accept={{ 'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.gif'] }}
         multiple={false}
       >
         <ImageField source="src" title="title" />
