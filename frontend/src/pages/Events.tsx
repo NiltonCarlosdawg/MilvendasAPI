@@ -1,19 +1,9 @@
+// frontend/src/pages/Events.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, 
-  Phone,
-  Loader2,
-  CheckCircle2,
-  X,
-  Bell,
-  Calendar,
-  MapPin,
-  ExternalLink,
-  Image as ImageIcon 
-}
- from 'lucide-react';
+import { Users, Phone, Loader2, Bell, Calendar, MapPin, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import EventDetailsModal from '../components/EventDetailsModal';
 
-// Interface atualizada conforme o backend
 interface EventItemType {
   id: string;
   title: string;
@@ -39,7 +29,6 @@ interface EventItemType {
   }>;
 }
 
-// Interface para o formulário de inscrição
 interface TicketRequestForm {
   name: string;
   email: string;
@@ -51,6 +40,8 @@ interface TicketRequestForm {
 const Events = () => {
   const [eventItems, setEventItems] = useState<EventItemType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<EventItemType | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [showFormId, setShowFormId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successId, setSuccessId] = useState<string | null>(null);
@@ -64,14 +55,17 @@ const Events = () => {
     message: ''
   });
 
+  // URL base da API
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.milvendas.ao';
+
   // Busca de dados na API
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('https://milvendasapi.onrender.com/api/v1/events?status=PUBLISHED');
+        const response = await fetch('https://api.milvendas.ao/api/v1/events?status=PUBLISHED');
         const data = await response.json();
         
-        // A API já pode filtrar por status, mas mantemos o filtro por segurança
+        // Garante que é um array e filtra apenas os publicados
         const published = Array.isArray(data) ? data.filter((ev: any) => ev.status === 'PUBLISHED') : [];
         setEventItems(published);
       } catch (error) {
@@ -83,42 +77,15 @@ const Events = () => {
     };
     
     fetchEvents();
-  }, []);
+  }, [API_BASE_URL]);
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!showFormId) return;
-    
-    setSubmitting(true);
-    setErrorMessage(null);
-    
-    try {
-      // Endpoint corrigido conforme o backend
-      const response = await fetch(`https://milvendasapi.onrender.com/api/v1/events/${showFormId}/ticket-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccessId(showFormId);
-        setTimeout(() => {
-          setShowFormId(null);
-          setSuccessId(null);
-        }, 3000);
-      } else {
-        setErrorMessage(data.error || "Erro ao processar inscrição");
-      }
-    } catch (error) {
-      console.error("Erro na inscrição:", error);
-      setErrorMessage("Erro de conexão. Verifique sua internet.");
-    } finally {
-      setSubmitting(false);
-    }
+  // Função para abrir o modal de detalhes
+  const openEventDetails = (event: EventItemType) => {
+    setSelectedEvent(event);
+    setModalOpen(true);
   };
 
+  // Função para formatar data com intervalo
   const formatDateRange = (startDate: string, endDate?: string | null) => {
     const start = new Date(startDate);
     const formattedStart = start.toLocaleDateString('pt-PT', { 
@@ -141,9 +108,44 @@ const Events = () => {
     return `${formattedStart} - ${formattedEnd}`;
   };
 
+  // Função para obter a imagem de capa
   const getCoverImage = (event: EventItemType) => {
     const cover = event.media?.find(m => m.isCover) || event.media?.[0];
-    return cover ? `https://milvendasapi.onrender.com/uploads/events/${cover.url}` : null;
+    return cover ? `${API_BASE_URL}/uploads/events/${cover.url}` : null;
+  };
+
+  // Função para lidar com a submissão do formulário de inscrição
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!showFormId) return;
+    
+    setSubmitting(true);
+    setErrorMessage(null);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/events/${showFormId}/ticket-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessId(showFormId);
+        setTimeout(() => {
+          setShowFormId(null);
+          setSuccessId(null);
+        }, 3000);
+      } else {
+        setErrorMessage(data.error || "Erro ao processar inscrição");
+      }
+    } catch (error) {
+      console.error("Erro na inscrição:", error);
+      setErrorMessage("Erro de conexão. Verifique sua internet.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) return (
@@ -197,11 +199,12 @@ const Events = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="group relative bg-slate-50 dark:bg-slate-900/40 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 transition-all duration-500 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none"
+                  className="group relative bg-slate-50 dark:bg-slate-900/40 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 transition-all duration-500 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none cursor-pointer"
+                  onClick={() => openEventDetails(event)}
                 >
-                  {/* Imagem de Capa (se existir) */}
+                  {/* Imagem de Capa como fundo */}
                   {coverImage && (
-                    <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
                       <img 
                         src={coverImage} 
                         alt="" 
@@ -226,14 +229,25 @@ const Events = () => {
                         <span className="px-3 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase rounded-lg border border-blue-200 dark:border-blue-500/20 flex items-center gap-1">
                           <MapPin size={12} /> {event.location}
                         </span>
+                        
+                        {/* Badge para evento externo */}
                         {event.eventType === 'THIRD_PARTY' && (
                           <span className="px-3 py-1 bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase rounded-lg border border-purple-200 dark:border-purple-500/20">
                             Externo
                           </span>
                         )}
+                        
+                        {/* Indicador de capacidade */}
                         {event.capacity && (
                           <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold">
                             <Users size={12} /> {event.capacity} lugares
+                          </div>
+                        )}
+
+                        {/* Indicador de imagem */}
+                        {event.media && event.media.length > 0 && (
+                          <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold">
+                            <ImageIcon size={12} /> {event.media.length}
                           </div>
                         )}
                       </div>
@@ -254,15 +268,19 @@ const Events = () => {
 
                       {/* Endereço (se existir) */}
                       {event.address && (
-                        <p className="text-xs text-slate-400 mb-6">
+                        <p className="text-xs text-slate-400 mb-6 line-clamp-1">
                           📍 {event.address}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-4">
+                      {/* Botões de ação - NOTA: O clique no card já abre o modal, 
+                          estes botões precisam de stopPropagation para não abrir o modal duas vezes */}
+                      <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
+                        {/* Botão de reserva (só se permitido) */}
                         {event.allowTicketRequest && (
                           <button
-                            onClick={() => { 
+                            onClick={(e) => { 
+                              e.stopPropagation();
                               setShowFormId(event.id); 
                               setFormData({
                                 name: '', 
@@ -279,21 +297,25 @@ const Events = () => {
                           </button>
                         )}
                         
+                        {/* Link externo (se existir) */}
                         {event.externalLink && (
                           <a 
                             href={event.externalLink}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="p-4 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 hover:text-blue-500 hover:border-blue-500 transition-all"
                           >
                             <ExternalLink size={20} />
                           </a>
                         )}
 
+                        {/* Link para WhatsApp */}
                         <a 
                           href={`https://wa.me/244922965959?text=Olá! Gostaria de mais informações sobre o evento: ${event.title}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="p-4 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 hover:text-green-500 hover:border-green-500 transition-all"
                         >
                           <Phone size={20} />
@@ -302,7 +324,7 @@ const Events = () => {
                     </div>
                   </div>
 
-                  {/* FORMULÁRIO OVERLAY */}
+                  {/* FORMULÁRIO OVERLAY - para inscrição rápida */}
                   <AnimatePresence>
                     {showFormId === event.id && (
                       <motion.div
@@ -310,15 +332,17 @@ const Events = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 40 }}
                         className="absolute inset-0 z-20 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md p-8 flex flex-col justify-center overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <button 
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setShowFormId(null);
                             setErrorMessage(null);
                           }} 
                           className="absolute top-6 right-6 p-2 text-slate-400 hover:text-red-500 transition-colors"
                         >
-                          <X size={24} />
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </button>
                         
                         {successId === event.id ? (
@@ -327,7 +351,7 @@ const Events = () => {
                               initial={{ scale: 0 }} animate={{ scale: 1 }}
                               className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto"
                             >
-                              <CheckCircle2 size={40} />
+                              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             </motion.div>
                             <h4 className="text-2xl font-black dark:text-white">Inscrição Enviada!</h4>
                             <p className="text-slate-500 text-sm">Aguarde o nosso contacto via WhatsApp.</p>
@@ -400,7 +424,10 @@ const Events = () => {
                               className="w-full py-5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20 transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {submitting ? (
-                                <Loader2 className="animate-spin mx-auto" />
+                                <svg className="animate-spin mx-auto" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
                               ) : (
                                 "Confirmar Presença"
                               )}
@@ -419,6 +446,16 @@ const Events = () => {
             })
           )}
         </div>
+
+        {/* Modal de Detalhes do Evento */}
+        <EventDetailsModal 
+          event={selectedEvent}
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedEvent(null);
+          }}
+        />
       </div>
     </section>
   );
