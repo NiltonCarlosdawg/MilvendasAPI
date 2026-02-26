@@ -1,9 +1,10 @@
 // src/context/ContentContext.tsx
-import React, { createContext, useContext, useState,useEffect } from 'react';
+// NOTA: useContent foi movido para src/hooks/useContent.ts para satisfazer
+// a regra react-refresh/only-export-components (apenas componentes por ficheiro).
+import React, { createContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
-import type { ReactNode } from 
-'react';
-
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 interface ContentContextType {
   content: Record<string, string>;
   updateContent: (key: string, value: string) => void;
@@ -12,26 +13,13 @@ interface ContentContextType {
   loadFromStorage: () => void;
 }
 
-// Exportar o contexto primeiro
-export const ContentContext = createContext<ContentContextType | undefined>(undefined);
-
-export const useContent = () => {
-  const context = useContext(ContentContext);
-  if (!context) {
-    throw new Error('useContent must be used within a ContentProvider');
-  }
-  return context;
-};
-
+// ─── Conteúdo padrão ──────────────────────────────────────────────────────────
 const defaultContent: Record<string, string> = {
-  // Hero
   'hero_title_1': 'Tecnologia que',
   'hero_title_highlight': 'Conecta e Inova',
   'hero_description': 'A Mil Vendas entrega soluções digitais robustas, focadas na melhor experiência para o seu cliente.',
   'hero_button_text': 'Contactar Equipa',
   'hero_whatsapp': '244922965959',
-  
-  // Services
   'services_badge': 'O que fazemos',
   'services_title': 'Soluções Completas',
   'service_1_title': 'Web Development',
@@ -42,55 +30,29 @@ const defaultContent: Record<string, string> = {
   'service_3_desc': 'Apps nativas e híbridas focadas na experiência do utilizador.',
   'service_4_title': 'Consultoria Tech',
   'service_4_desc': 'Estratégia digital para escalar o seu modelo de negócio.',
-  
-  // About
   'about_title': 'Compromisso com a Excelência',
   'about_description': 'A Mil Vendas não é apenas uma empresa, é o seu braço direito tecnológico em Luanda.',
   'about_feature_1': 'Desenvolvimento Nativo',
   'about_feature_2': 'Cloud Computing',
   'about_feature_3': 'Segurança de Dados',
-  
-  // Events
-  'event_1_title': 'Workshop de React Avançado',
-  'event_1_date': '15 Março 2024',
-  'event_1_time': '14:00 - 18:00',
-  'event_1_location': 'Luanda, Talatona',
-  'event_1_description': 'Workshop prático sobre as últimas features do React e TypeScript.',
-  
-  'event_2_title': 'Meetup Tech Angola',
-  'event_2_date': '22 Março 2024',
-  'event_2_time': '18:00 - 21:00',
-  'event_2_location': 'Luanda, Centro',
-  'event_2_description': 'Encontro da comunidade de desenvolvedores para networking e troca de ideias.',
-  
-  'event_3_title': 'Hackathon Inovação Digital',
-  'event_3_date': '30 Março 2024',
-  'event_3_time': '09:00 - 18:00',
-  'event_3_location': 'Luanda, Belas',
-  'event_3_description': 'Competição de 48h para desenvolver soluções inovadoras.',
-  
-  // Portfolio
-  'portfolio_1_title': 'E-commerce Platform',
-  'portfolio_1_description': 'Plataforma de comércio eletrónico completa com painel administrativo e sistema de pagamentos.',
-  
-  'portfolio_2_title': 'App de Delivery',
-  'portfolio_2_description': 'Aplicativo móvel para delivery com rastreamento em tempo real e notificações push.',
-  
-  'portfolio_3_title': 'Sistema ERP',
-  'portfolio_3_description': 'Sistema de gestão empresarial customizado com relatórios analíticos em tempo real.',
-  
-  'portfolio_4_title': 'Website Corporativo',
-  'portfolio_4_description': 'Site institucional com blog integrado, sistema de notícias e área de membros.',
 };
 
+// ─── Context ──────────────────────────────────────────────────────────────────
+export const ContentContext = createContext<ContentContextType | undefined>(undefined);
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
 interface ContentProviderProps {
   children: ReactNode;
 }
 
 export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) => {
   const [content, setContent] = useState<Record<string, string>>(() => {
-    const saved = localStorage.getItem('site_content');
-    return saved ? JSON.parse(saved) : defaultContent;
+    try {
+      const saved = localStorage.getItem('site_content');
+      return saved ? (JSON.parse(saved) as Record<string, string>) : defaultContent;
+    } catch {
+      return defaultContent;
+    }
   });
 
   const updateContent = (key: string, value: string) => {
@@ -111,24 +73,29 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
   };
 
   const loadFromStorage = () => {
-    const saved = localStorage.getItem('site_content');
-    if (saved) {
-      setContent(JSON.parse(saved));
+    try {
+      const saved = localStorage.getItem('site_content');
+      if (saved) setContent(JSON.parse(saved) as Record<string, string>);
+    } catch {
+      // Ignora erros de parse
     }
   };
 
+
   useEffect(() => {
-    loadFromStorage();
+    try {
+      const saved = localStorage.getItem('site_content');
+      if (saved) {
+        const parsed = JSON.parse(saved) as Record<string, string>;
+        setContent(parsed);
+      }
+    } catch {
+      // Ignora erros de parse
+    }
   }, []);
 
   return (
-    <ContentContext.Provider value={{ 
-      content, 
-      updateContent, 
-      resetContent,
-      saveToStorage,
-      loadFromStorage
-    }}>
+    <ContentContext.Provider value={{ content, updateContent, resetContent, saveToStorage, loadFromStorage }}>
       {children}
     </ContentContext.Provider>
   );

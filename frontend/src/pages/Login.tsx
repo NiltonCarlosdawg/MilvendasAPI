@@ -1,16 +1,17 @@
+// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, ShieldAlert, Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
+
+  const { login }  = useAuth();
+  const navigate   = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,22 +19,15 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('https://milvendasapi.onrender.com/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        login(email, password); // Guarda o token no Contexto e LocalStorage
-        navigate('/admin/dashboard'); // Redireciona para o painel
-      } else {
-        setError(data.message || 'Credenciais inválidas. Tente novamente.');
-      }
-    } catch (err) {
-      setError('Erro ao conectar com o servidor da Mil Vendas.');
+      await login(email, password);
+      navigate('/admin/dashboard');
+    } catch (loginError) {
+      // AuthContext.login já lança Error com a mensagem da API
+      setError(
+        loginError instanceof Error
+          ? loginError.message
+          : 'Credenciais inválidas. Tente novamente.'
+      );
     } finally {
       setLoading(false);
     }
@@ -52,12 +46,12 @@ const Login = () => {
             <label className="text-xs font-bold text-blue-400 uppercase mb-2 block">E-mail Corporativo</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-12 text-white outline-none focus:border-blue-500 transition-all"
                 placeholder="admin@milvendas.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -67,12 +61,12 @@ const Login = () => {
             <label className="text-xs font-bold text-blue-400 uppercase mb-2 block">Chave de Segurança</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-              <input 
+              <input
                 type="password"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-12 text-white outline-none focus:border-blue-500 transition-all"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -84,7 +78,7 @@ const Login = () => {
             </div>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all flex justify-center items-center gap-2"

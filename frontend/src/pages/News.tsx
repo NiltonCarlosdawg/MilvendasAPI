@@ -23,7 +23,7 @@ const News = () => {
     const fetchNews = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://milvendasapi.onrender.com/api/v1/news');
+        const response = await fetch('http://localhost:3001/api/v1/news');
         
         if (!response.ok) {
           throw new Error('Erro ao buscar notícias');

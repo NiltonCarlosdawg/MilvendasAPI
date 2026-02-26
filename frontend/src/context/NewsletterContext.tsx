@@ -1,10 +1,10 @@
 // src/context/NewsletterContext.tsx
-import React, { createContext, useContext, useState,useEffect } from 'react';
+// useNewsletter foi movido para src/hooks/useNewsletter.ts
+import React, { createContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
-import type { ReactNode } from 
-'react';
-
-interface Subscription {
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+export interface Subscription {
   id: string;
   email: string;
   name?: string;
@@ -14,7 +14,7 @@ interface Subscription {
   read: boolean;
 }
 
-interface NewsletterContextType {
+export interface NewsletterContextType {
   subscriptions: Subscription[];
   addSubscription: (subscription: Omit<Subscription, 'id' | 'subscribedAt' | 'read'>) => void;
   markAsRead: (id: string) => void;
@@ -22,24 +22,18 @@ interface NewsletterContextType {
   unreadCount: number;
 }
 
+// ─── Context ──────────────────────────────────────────────────────────────────
 export const NewsletterContext = createContext<NewsletterContextType | undefined>(undefined);
 
-export const useNewsletter = () => {
-  const context = useContext(NewsletterContext);
-  if (!context) {
-    throw new Error('useNewsletter must be used within NewsletterProvider');
-  }
-  return context;
-};
-
-interface NewsletterProviderProps {
-  children: ReactNode;
-}
-
-export const NewsletterProvider: React.FC<NewsletterProviderProps> = ({ children }) => {
+// ─── Provider ─────────────────────────────────────────────────────────────────
+export const NewsletterProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => {
-    const saved = localStorage.getItem('newsletter_subscriptions');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('newsletter_subscriptions');
+      return saved ? (JSON.parse(saved) as Subscription[]) : [];
+    } catch {
+      return [];
+    }
   });
 
   const unreadCount = subscriptions.filter(sub => !sub.read).length;
@@ -49,7 +43,7 @@ export const NewsletterProvider: React.FC<NewsletterProviderProps> = ({ children
       ...subscriptionData,
       id: Date.now().toString(),
       subscribedAt: new Date(),
-      read: false
+      read: false,
     };
 
     setSubscriptions(prev => {
@@ -58,22 +52,17 @@ export const NewsletterProvider: React.FC<NewsletterProviderProps> = ({ children
       return updated;
     });
 
-    // Simular notificação
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('Nova Inscrição!', {
         body: `Novo inscrito: ${subscriptionData.email}`,
-        icon: '/logo-mv.svg'
+        icon: '/logo-mv.svg',
       });
     }
-
-    return newSubscription;
   };
 
   const markAsRead = (id: string) => {
     setSubscriptions(prev => {
-      const updated = prev.map(sub => 
-        sub.id === id ? { ...sub, read: true } : sub
-      );
+      const updated = prev.map(sub => sub.id === id ? { ...sub, read: true } : sub);
       localStorage.setItem('newsletter_subscriptions', JSON.stringify(updated));
       return updated;
     });
@@ -87,25 +76,20 @@ export const NewsletterProvider: React.FC<NewsletterProviderProps> = ({ children
     });
   };
 
+  // Pedir permissão para notificações
   useEffect(() => {
-    // Pedir permissão para notificações
     if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
+      void Notification.requestPermission();
     }
   }, []);
 
+  // Persistir sempre que subscriptions mudar
   useEffect(() => {
     localStorage.setItem('newsletter_subscriptions', JSON.stringify(subscriptions));
   }, [subscriptions]);
 
   return (
-    <NewsletterContext.Provider value={{ 
-      subscriptions, 
-      addSubscription, 
-      markAsRead, 
-      deleteSubscription,
-      unreadCount 
-    }}>
+    <NewsletterContext.Provider value={{ subscriptions, addSubscription, markAsRead, deleteSubscription, unreadCount }}>
       {children}
     </NewsletterContext.Provider>
   );

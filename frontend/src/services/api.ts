@@ -1,4 +1,4 @@
-const API_URL = 'https://github.com/NiltonCarlosdawg/MilvendasAPI.git'; // Substitui pelo URL real do teu servidor (ex: http://localhost:5000)
+const API_URL = 'http://localhost:3001/api/v1'; // Substitui pelo URL real do teu servidor (ex: http://localhost:5000)
 
 export const api = {
   getProjects: () => fetch(`${API_URL}/projects`).then(res => res.json()),

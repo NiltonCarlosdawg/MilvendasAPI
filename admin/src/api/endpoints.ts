@@ -1,5 +1,5 @@
 //export const BASE_URL = 'http://localhost:3001/api/v1';
-export const BASE_URL = 'https://api.milvendas.ao/api/v1';
+export const BASE_URL = 'http://localhost:3001/api/v1';
 
 // Paths relativos — usados pelo dataProvider e apiClient (que já prefixa BASE_URL)
 export const PATHS = {

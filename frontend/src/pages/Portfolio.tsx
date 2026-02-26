@@ -1,65 +1,67 @@
-// src/pages/Portfolio.tsx - VERSÃO SINCRONIZADA COM ADMIN
-import  { useState, useEffect } from 'react';
+// src/pages/Portfolio.tsx
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code, Smartphone, Globe, Eye, Loader2, X, ExternalLink, Calendar, Tag, Layers } from 'lucide-react';
 
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 interface PortfolioItemType {
   id: string;
   title: string;
-  category: string;
+  category?: string;
   description: string;
-  mediaUrl: string; // Sincronizado com Admin
+  mediaUrl: string;
   technologies?: string[];
   client?: string;
   year?: string;
 }
 
-const Portfolio = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [selectedProject, setSelectedProject] = useState<PortfolioItemType | null>(null);
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItemType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
+// ─── URLs ─────────────────────────────────────────────────────────────────────
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001')
+  .replace(/\/api\/v1\/?$/, '');
 
-  // Lógica de URLs idêntica ao PortifolioPreview.tsx (Admin)
-  const API_URL = 'https://milvendasapi.onrender.com/api/v1/portfolio';
-  const MEDIA_BASE_URL = 'https://milvendasapi.onrender.com/uploads/';
+const API_URL       = `${API_BASE_URL}/api/v1/portfolio`;
+const MEDIA_BASE_URL = `${API_BASE_URL}/uploads/`;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const getIcon = (category?: string) => {
+  const cat = category?.toLowerCase() ?? 'web';
+  if (cat.includes('mobile') || cat.includes('app')) return <Smartphone className="w-5 h-5" />;
+  if (cat.includes('software') || cat.includes('code')) return <Code className="w-5 h-5" />;
+  return <Globe className="w-5 h-5" />;
+};
+
+// ─── Componente ───────────────────────────────────────────────────────────────
+const Portfolio = () => {
+  const [activeFilter, setActiveFilter]       = useState('all');
+  const [selectedProject, setSelectedProject] = useState<PortfolioItemType | null>(null);
+  const [portfolioItems, setPortfolioItems]   = useState<PortfolioItemType[]>([]);
+  const [loading, setLoading]                 = useState(true);
+  const [fetchError, setFetchError]           = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
         setLoading(true);
         const response = await fetch(API_URL);
-        
         if (!response.ok) throw new Error('Falha ao conectar com o servidor');
-        
-        const data = await response.json();
-        // A API retorna um array direto conforme visto na lógica do Admin
-        setPortfolioItems(Array.isArray(data) ? data : []);
-      } catch (err: any) {
-        console.error("Erro no Portfólio Público:", err);
-        setError("Não foi possível carregar os projetos.");
+        const data: unknown = await response.json();
+        setPortfolioItems(Array.isArray(data) ? (data as PortfolioItemType[]) : []);
+      } catch (err) {
+        console.error('Erro no Portfólio Público:', err);
+        setFetchError('Não foi possível carregar os projetos.');
       } finally {
         setLoading(false);
       }
     };
-
     fetchPortfolio();
   }, []);
 
-  const getIcon = (category?: string) => {
-    const cat = category?.toLowerCase() || 'web';
-    if (cat.includes('mobile') || cat.includes('app')) return <Smartphone className="w-5 h-5" />;
-    if (cat.includes('software') || cat.includes('code')) return <Code className="w-5 h-5" />;
-    return <Globe className="w-5 h-5" />;
-  };
-
   const categories = ['all', ...Array.from(new Set(
-    portfolioItems.map(item => item.category).filter(Boolean)
+    portfolioItems.map(item => item.category).filter((c): c is string => Boolean(c))
   ))];
 
-  const filteredItems = activeFilter === 'all' 
-    ? portfolioItems 
+  const filteredItems = activeFilter === 'all'
+    ? portfolioItems
     : portfolioItems.filter(item => item.category === activeFilter);
 
   if (loading) {
@@ -71,10 +73,18 @@ const Portfolio = () => {
     );
   }
 
+  if (fetchError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
+        <p className="text-red-500">{fetchError}</p>
+      </div>
+    );
+  }
+
   return (
     <section id="portfolio" className="min-h-screen py-24 bg-white dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Títulos */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <h2 className="text-blue-500 font-bold uppercase tracking-widest text-sm">Nosso Portfólio</h2>
@@ -84,29 +94,29 @@ const Portfolio = () => {
         </motion.div>
 
         {/* Filtros */}
-{categories.length > 1 && (
-  <div className="flex flex-wrap justify-center gap-3 mb-16">
-    {categories.map(category => (
-      <button
-        key={category}
-        onClick={() => setActiveFilter(category)}
-        className={`px-8 py-3 rounded-2xl font-bold transition-all ${
-          activeFilter === category 
-          ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30 scale-105' 
-          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-        }`}
-      >
-        {category === 'all' ? 'Todos' : category}
-      </button>
-    ))}
-  </div>
-)}
+        {categories.length > 1 && (
+          <div className="flex flex-wrap justify-center gap-3 mb-16">
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setActiveFilter(category)}
+                className={`px-8 py-3 rounded-2xl font-bold transition-all ${
+                  activeFilter === category
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30 scale-105'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {category === 'all' ? 'Todos' : category}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Grid de Projetos */}
+        {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <AnimatePresence mode='popLayout'>
+          <AnimatePresence mode="popLayout">
             {filteredItems.map((item, index) => (
-              <motion.div 
+              <motion.div
                 layout
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -115,16 +125,15 @@ const Portfolio = () => {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="group bg-slate-50 dark:bg-slate-800/40 rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 overflow-hidden hover:border-blue-500 transition-colors"
               >
-                {/* Imagem com a Lógica do Admin */}
                 <div className="relative h-80 overflow-hidden">
-                  <img 
-                    src={`${MEDIA_BASE_URL}${item.mediaUrl}`} 
+                  <img
+                    src={`${MEDIA_BASE_URL}${item.mediaUrl}`}
                     alt={item.title}
-                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/800x600?text=Imagem+indisponivel'; }}
+                    onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/800x600?text=Imagem+indisponivel'; }}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-8">
-                    <button 
+                    <button
                       onClick={() => setSelectedProject(item)}
                       className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-black flex items-center gap-3 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-2xl"
                     >
@@ -149,7 +158,7 @@ const Portfolio = () => {
                   </p>
                   <div className="flex items-center gap-2 pt-6 border-t border-slate-200 dark:border-slate-700">
                     <div className="text-xs font-bold text-slate-400 uppercase">Cliente:</div>
-                    <div className="text-sm font-black text-slate-700 dark:text-slate-200">{item.client || 'Particular'}</div>
+                    <div className="text-sm font-black text-slate-700 dark:text-slate-200">{item.client ?? 'Particular'}</div>
                   </div>
                 </div>
               </motion.div>
@@ -161,20 +170,20 @@ const Portfolio = () => {
         <AnimatePresence>
           {selectedProject && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                exit={{ opacity: 0, scale: 0.9 }} 
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 className="bg-white dark:bg-slate-900 rounded-[3rem] max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
               >
                 <div className="relative h-64 md:h-[500px]">
-                  <img 
-                    src={`${MEDIA_BASE_URL}${selectedProject.mediaUrl}`} 
-                    className="w-full h-full object-cover" 
-                    alt={selectedProject.title} 
+                  <img
+                    src={`${MEDIA_BASE_URL}${selectedProject.mediaUrl}`}
+                    className="w-full h-full object-cover"
+                    alt={selectedProject.title}
                   />
-                  <button 
-                    onClick={() => setSelectedProject(null)} 
+                  <button
+                    onClick={() => setSelectedProject(null)}
                     className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full text-white border border-white/20"
                   >
                     <X size={20} />
@@ -188,7 +197,7 @@ const Portfolio = () => {
                   <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mt-4 mb-8 tracking-tighter">
                     {selectedProject.title}
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
                     <div className="space-y-4">
                       <h4 className="font-black text-slate-900 dark:text-white uppercase text-sm">Sobre o Projeto</h4>
@@ -201,22 +210,22 @@ const Portfolio = () => {
                         <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
                           <Calendar size={14} /> Data
                         </div>
-                        <span className="font-bold dark:text-white text-xl">{selectedProject.year || '2024'}</span>
+                        <span className="font-bold dark:text-white text-xl">{selectedProject.year ?? '2024'}</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
                           <Tag size={14} /> Cliente
                         </div>
-                        <span className="font-bold dark:text-white text-xl">{selectedProject.client || 'Particular'}</span>
+                        <span className="font-bold dark:text-white text-xl">{selectedProject.client ?? 'Particular'}</span>
                       </div>
                     </div>
                   </div>
 
-                  <a 
+                  <a
                     href={`https://wa.me/244922965959?text=Olá! Vi o projeto "${selectedProject.title}" e gostaria de algo semelhante.`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-3xl text-center block shadow-2xl shadow-blue-500/20 transition-all scale-100 hover:scale-[1.02] flex items-center justify-center gap-2"
+                    className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-3xl text-center flex items-center justify-center gap-2 shadow-2xl shadow-blue-500/20 transition-all hover:scale-[1.02]"
                   >
                     SOLICITAR ORÇAMENTO PARA PROJETO SIMILAR
                     <ExternalLink size={18} />
