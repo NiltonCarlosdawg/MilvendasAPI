@@ -6,7 +6,7 @@ import EventDetailsModal from '../components/EventDetailsModal';
 
 // ─── URLs centralizadas ────────────────────────────────────────────────────────
 // Remove /api/v1 do final se o VITE_API_URL já o incluir, evitando duplicação
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001')
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://api.milvendas.ao')
   .replace(/\/api\/v1\/?$/, '');
 
 const API_URL     = `${API_BASE_URL}/api/v1`;   // para chamadas à API
